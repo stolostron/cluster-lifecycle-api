@@ -16,13 +16,13 @@ import (
 
 // FakeBareMetalAssets implements BareMetalAssetInterface
 type FakeBareMetalAssets struct {
-	Fake *FakeInventroyV1alpha1
+	Fake *FakeInventoryV1alpha1
 	ns   string
 }
 
-var baremetalassetsResource = schema.GroupVersionResource{Group: "inventroy.open-cluster-management.io", Version: "v1alpha1", Resource: "baremetalassets"}
+var baremetalassetsResource = schema.GroupVersionResource{Group: "inventory.open-cluster-management.io", Version: "v1alpha1", Resource: "baremetalassets"}
 
-var baremetalassetsKind = schema.GroupVersionKind{Group: "inventroy.open-cluster-management.io", Version: "v1alpha1", Kind: "BareMetalAsset"}
+var baremetalassetsKind = schema.GroupVersionKind{Group: "inventory.open-cluster-management.io", Version: "v1alpha1", Kind: "BareMetalAsset"}
 
 // Get takes name of the bareMetalAsset, and returns the corresponding bareMetalAsset object, and an error if there is any.
 func (c *FakeBareMetalAssets) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.BareMetalAsset, err error) {

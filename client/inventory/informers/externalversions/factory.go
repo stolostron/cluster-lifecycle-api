@@ -156,9 +156,9 @@ type SharedInformerFactory interface {
 	ForResource(resource schema.GroupVersionResource) (GenericInformer, error)
 	WaitForCacheSync(stopCh <-chan struct{}) map[reflect.Type]bool
 
-	Inventroy() inventory.Interface
+	Inventory() inventory.Interface
 }
 
-func (f *sharedInformerFactory) Inventroy() inventory.Interface {
+func (f *sharedInformerFactory) Inventory() inventory.Interface {
 	return inventory.New(f, f.namespace, f.tweakListOptions)
 }

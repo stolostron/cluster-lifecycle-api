@@ -7,7 +7,7 @@ import (
 )
 
 const (
-	GroupName = "inventroy.open-cluster-management.io"
+	GroupName = "inventory.open-cluster-management.io"
 	Version   = "v1alpha1"
 )
 
