@@ -41,7 +41,7 @@ type bareMetalAssets struct {
 }
 
 // newBareMetalAssets returns a BareMetalAssets
-func newBareMetalAssets(c *InventroyV1alpha1Client, namespace string) *bareMetalAssets {
+func newBareMetalAssets(c *InventoryV1alpha1Client, namespace string) *bareMetalAssets {
 	return &bareMetalAssets{
 		client: c.RESTClient(),
 		ns:     namespace,

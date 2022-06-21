@@ -46,13 +46,13 @@ func NewFilteredBareMetalAssetInformer(client versioned.Interface, namespace str
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.InventroyV1alpha1().BareMetalAssets(namespace).List(context.TODO(), options)
+				return client.InventoryV1alpha1().BareMetalAssets(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.InventroyV1alpha1().BareMetalAssets(namespace).Watch(context.TODO(), options)
+				return client.InventoryV1alpha1().BareMetalAssets(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&inventoryv1alpha1.BareMetalAsset{},

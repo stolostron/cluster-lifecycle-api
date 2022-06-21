@@ -4,8 +4,8 @@ package fake
 
 import (
 	clientset "github.com/stolostron/cluster-lifecycle-api/client/inventory/clientset/versioned"
-	inventroyv1alpha1 "github.com/stolostron/cluster-lifecycle-api/client/inventory/clientset/versioned/typed/inventory/v1alpha1"
-	fakeinventroyv1alpha1 "github.com/stolostron/cluster-lifecycle-api/client/inventory/clientset/versioned/typed/inventory/v1alpha1/fake"
+	inventoryv1alpha1 "github.com/stolostron/cluster-lifecycle-api/client/inventory/clientset/versioned/typed/inventory/v1alpha1"
+	fakeinventoryv1alpha1 "github.com/stolostron/cluster-lifecycle-api/client/inventory/clientset/versioned/typed/inventory/v1alpha1/fake"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/watch"
 	"k8s.io/client-go/discovery"
@@ -63,7 +63,7 @@ var (
 	_ testing.FakeClient  = &Clientset{}
 )
 
-// InventroyV1alpha1 retrieves the InventroyV1alpha1Client
-func (c *Clientset) InventroyV1alpha1() inventroyv1alpha1.InventroyV1alpha1Interface {
-	return &fakeinventroyv1alpha1.FakeInventroyV1alpha1{Fake: &c.Fake}
+// InventoryV1alpha1 retrieves the InventoryV1alpha1Client
+func (c *Clientset) InventoryV1alpha1() inventoryv1alpha1.InventoryV1alpha1Interface {
+	return &fakeinventoryv1alpha1.FakeInventoryV1alpha1{Fake: &c.Fake}
 }
