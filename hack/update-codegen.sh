@@ -20,7 +20,7 @@ trap cleanup EXIT
 
 go install -mod=vendor ./${CODEGEN_PKG}/cmd/{defaulter-gen,client-gen,lister-gen,informer-gen,deepcopy-gen}
 
-for group in imageregistry inventory; do
+for group in imageregistry; do
   bash ${CODEGEN_PKG}/generate-groups.sh "client,lister,informer" \
     github.com/stolostron/cluster-lifecycle-api/client/${group} \
     github.com/stolostron/cluster-lifecycle-api \
