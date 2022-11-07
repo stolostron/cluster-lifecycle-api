@@ -9,7 +9,6 @@ Some APIs are moved from the foundation repository https://github.com/stolostron
 * `ManagedClusterAction` is defined as a certain action job executed on a certain managed cluster to Create/Update/Delete a resource.
 * `ManagedClusterView` is defined to get a specified resource on a certain managed cluster.
 * `ManagedClusterImageRegistry` is defined as a configuration to override the images of pods deployed on the managed clusters.
-* `BareMetalAsset` is defined to hold inventory records for use in baremetal clusters.
 * `ManagedClusterInfo` is the namespace-scoped definition of managedCluster, including some special infos for MCE and ACM.
 
 ## How to update the APIs

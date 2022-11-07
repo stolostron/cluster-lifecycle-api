@@ -28,7 +28,6 @@ $(call add-crd-gen,actionv1beta1,./action/v1beta1,./action/v1beta1,./action/v1be
 $(call add-crd-gen,viewv1beta1,./view/v1beta1,./view/v1beta1,./view/v1beta1)
 $(call add-crd-gen,clusterinfov1beta1,./clusterinfo/v1beta1,./clusterinfo/v1beta1,./clusterinfo/v1beta1)
 $(call add-crd-gen,imageregistryv1beta1,./imageregistry/v1alpha1,./imageregistry/v1alpha1,./imageregistry/v1alpha1)
-$(call add-crd-gen,inventoryv1beta1,./inventory/v1alpha1,./inventory/v1alpha1,./inventory/v1alpha1)
 
 RUNTIME ?= podman
 RUNTIME_IMAGE_NAME ?= openshift-api-generator
