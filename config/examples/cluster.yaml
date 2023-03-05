@@ -1,0 +1,12 @@
+
+---
+
+apiVersion: cluster.open-cluster-management.io/v1
+kind: ManagedCluster
+metadata:
+  name: cluster1
+spec:
+  hubAcceptsClient: true
+status:
+  agentInfo:
+    klusterletVersion: 2.3.1
