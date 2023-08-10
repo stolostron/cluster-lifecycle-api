@@ -253,6 +253,8 @@ const (
 	KubeVendorIKS KubeVendorType = "IKS"
 	// KubeVendorOSD OpenShiftDedicated
 	KubeVendorOSD KubeVendorType = "OpenShiftDedicated"
+	// kubeVendorMicroShift microShift
+	kubeVendorMicroShift KubeVendorType = "MicroShift"
 	// KubeVendorOther other (unable to auto detect)
 	KubeVendorOther KubeVendorType = "Other"
 )
