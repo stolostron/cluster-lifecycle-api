@@ -10,6 +10,7 @@ Some APIs are moved from the foundation repository https://github.com/stolostron
 * `ManagedClusterView` is defined to get a specified resource on a certain managed cluster.
 * `ManagedClusterImageRegistry` is defined as a configuration to override the images of pods deployed on the managed clusters.
 * `ManagedClusterInfo` is the namespace-scoped definition of managedCluster, including some special infos for MCE and ACM.
+* `KluterletConfig` is defined to hold the configuration of klusterlet.
 
 ## How to update the APIs
 

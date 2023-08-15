@@ -10,6 +10,7 @@ FILES="action/v1beta1/*.crd.yaml
 view/v1beta1/*.crd.yaml
 clusterinfo/v1beta1/*.crd.yaml
 imageregistry/v1alpha1/*.crd.yaml
+klusterletconfig/v1alpha1/*.crd.yaml
 "
 
 FAILS=false

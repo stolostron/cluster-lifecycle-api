@@ -10,6 +10,6 @@ verify="${VERIFY:-}"
 GOFLAGS="" bash ${CODEGEN_PKG}/generate-groups.sh "deepcopy" \
   github.com/stolostron/cluster-lifecycle-api/generated \
   github.com/stolostron/cluster-lifecycle-api \
-  "action:v1beta1 view:v1beta1 clusterinfo:v1beta1 imageregistry:v1alpha1" \
+  "action:v1beta1 view:v1beta1 clusterinfo:v1beta1 imageregistry:v1alpha1 klusterletconfig:v1alpha1" \
   --go-header-file ${SCRIPT_ROOT}/hack/empty.txt \
   ${verify}
