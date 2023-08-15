@@ -1,0 +1,25 @@
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletVersion
+metadata:
+  name: version
+spec:
+  type: RollingCanary
+  rollingCanaryConfig:
+    placementRef:
+      name: aws-placement
+      namespace: aws
+    maxConcurrentlyUpdating: 25%
+    pauseAfterComplete: false
+status:
+  desiredVersion: 2.3.1
+  conditions:
+    - lastTransitionTime: "2023-03-02T05:48:12Z"
+      message: 20/60 upgrading...
+      reason: Upgrading
+      status: "False"
+      type: CanaryCompleted
+    - lastTransitionTime: "2023-03-02T05:48:12Z"
+      message: wait canary complete...
+      reason: CanaryNotCompleted
+      status: "False"
+      type: RollingCompleted

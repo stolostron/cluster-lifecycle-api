@@ -1,0 +1,63 @@
+apiVersion: config.open-cluster-management.io/v1alpha1
+kind: KlusterletVersion
+metadata:
+  name: version
+spec:
+  type: RollingCanary
+  rollingCanaryConfig:
+    placementRef:
+      name: aws-placement
+      namespace: aws
+    maxConcurrentlyUpdating: 25%
+status:
+  desiredVersion: 2.3.1
+  conditions:
+    - lastTransitionTime: "2023-03-02T05:48:12Z"
+      message: 20/60 upgrading...
+      reason: Upgrading
+      status: "False"
+      type: CanaryCompleted
+
+---
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: AddOnHubConfig
+metadata:
+  name: mce-2.3.1
+spec:
+  desiredVersion: 2.3.1
+status:
+  supportedVersions:
+    - 2.3.1
+    - 2.3.0
+---
+apiVersion: addon.open-cluster-management.io/v1alpha1
+kind: ClusterManagementAddOn
+metadata:
+  name: work-manager
+spec:
+  defaultConfigs:
+  - Group: addon.open-cluster-management.io
+    Resource: hubaddonconfigs
+    Name: mce-2.3.0
+  installStrategy:
+    type: Placements
+    placements:
+      - name: global-placement
+        namespace: default
+        configs:
+          - group: addon.open-cluster-management.io
+            resource: addonhubconfigs
+            name: mce-2.3.0
+        rolloutStrategy:
+          type: RollingUpdateWithCanary
+          rollingUpdateWithCanary:
+            placement:
+              name: canary-placement
+              namespace: default
+            maxConcurrentlyUpdating: 25%
+      - name: canary-placement
+        namespace: default
+        rolloutStrategy:
+          type: RollingUpdate
+          rollingUpdate:
+            maxConcurrentlyUpdating: 50%
