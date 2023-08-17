@@ -14,6 +14,7 @@ action/v1beta1 \
 view/v1beta1 \
 clusterinfo/v1beta1 \
 imageregistry/v1alpha1 \
+klusterletconfig/v1alpha1 \
 "
 
 API_PACKAGES="\
@@ -21,4 +22,5 @@ github.com/stolostron/cluster-lifecycle-api/action/v1beta1,\
 github.com/stolostron/cluster-lifecycle-api/view/v1beta1,\
 github.com/stolostron/cluster-lifecycle-api/clusterinfo/v1beta1,\
 github.com/stolostron/cluster-lifecycle-api/imageregistry/v1alpha1\
+github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1\
 "
