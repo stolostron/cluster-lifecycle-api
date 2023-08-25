@@ -41,6 +41,12 @@ type KlusterletConfigSpec struct {
 	// If the placement is an empty object, the placement will match all nodes and tolerate nothing.
 	// +optional
 	NodePlacement *operatorv1.NodePlacement `json:"nodePlacement,omitempty"`
+
+	// HubKubeAPIServerProxyConfig holds proxy settings for connections between klusterlet/add-on agents
+	// on the managed cluster and the kube-apiserver on the hub cluster.
+	// Empty means no proxy settings is available.
+	// +optional
+	HubKubeAPIServerProxyConfig KubeAPIServerProxyConfig `json:"hubKubeAPIServerProxyConfig,omitempty"`
 }
 
 // KlusterletConfigStatus defines the observed state of KlusterletConfig.
@@ -56,6 +62,25 @@ type Registries struct {
 	// Source is the source registry. All image registries will be replaced by Mirror if Source is empty.
 	// +optional
 	Source string `json:"source"`
+}
+
+// KubeAPIServerProxyConfig describes the proxy settings for the connections to a kube-apiserver
+type KubeAPIServerProxyConfig struct {
+	// HTTPProxy is the URL of the proxy for HTTP requests
+	// +optional
+	HTTPProxy string `json:"httpProxy,omitempty"`
+
+	// HTTPSProxy is the URL of the proxy for HTTPS requests
+	// HTTPSProxy will be chosen if both HTTPProxy and HTTPSProxy are set.
+	// +optional
+	HTTPSProxy string `json:"httpsProxy,omitempty"`
+
+	// CABundle is a CA certificate bundle to verify the proxy server.
+	// It will be ignored if only HTTPProxy is set;
+	// And it is required when HTTPSProxy is set and self signed CA certificate is used
+	// by the proxy server.
+	// +optional
+	CABundle []byte `json:"caBundle,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
