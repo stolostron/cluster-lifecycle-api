@@ -17,7 +17,6 @@ import (
 // FakeKlusterletConfigs implements KlusterletConfigInterface
 type FakeKlusterletConfigs struct {
 	Fake *FakeConfigV1alpha1
-	ns   string
 }
 
 var klusterletconfigsResource = schema.GroupVersionResource{Group: "config.open-cluster-management.io", Version: "v1alpha1", Resource: "klusterletconfigs"}
@@ -27,8 +26,7 @@ var klusterletconfigsKind = schema.GroupVersionKind{Group: "config.open-cluster-
 // Get takes name of the klusterletConfig, and returns the corresponding klusterletConfig object, and an error if there is any.
 func (c *FakeKlusterletConfigs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.KlusterletConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(klusterletconfigsResource, c.ns, name), &v1alpha1.KlusterletConfig{})
-
+		Invokes(testing.NewRootGetAction(klusterletconfigsResource, name), &v1alpha1.KlusterletConfig{})
 	if obj == nil {
 		return nil, err
 	}
@@ -38,8 +36,7 @@ func (c *FakeKlusterletConfigs) Get(ctx context.Context, name string, options v1
 // List takes label and field selectors, and returns the list of KlusterletConfigs that match those selectors.
 func (c *FakeKlusterletConfigs) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.KlusterletConfigList, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewListAction(klusterletconfigsResource, klusterletconfigsKind, c.ns, opts), &v1alpha1.KlusterletConfigList{})
-
+		Invokes(testing.NewRootListAction(klusterletconfigsResource, klusterletconfigsKind, opts), &v1alpha1.KlusterletConfigList{})
 	if obj == nil {
 		return nil, err
 	}
@@ -60,15 +57,13 @@ func (c *FakeKlusterletConfigs) List(ctx context.Context, opts v1.ListOptions) (
 // Watch returns a watch.Interface that watches the requested klusterletConfigs.
 func (c *FakeKlusterletConfigs) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(klusterletconfigsResource, c.ns, opts))
-
+		InvokesWatch(testing.NewRootWatchAction(klusterletconfigsResource, opts))
 }
 
 // Create takes the representation of a klusterletConfig and creates it.  Returns the server's representation of the klusterletConfig, and an error, if there is any.
 func (c *FakeKlusterletConfigs) Create(ctx context.Context, klusterletConfig *v1alpha1.KlusterletConfig, opts v1.CreateOptions) (result *v1alpha1.KlusterletConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(klusterletconfigsResource, c.ns, klusterletConfig), &v1alpha1.KlusterletConfig{})
-
+		Invokes(testing.NewRootCreateAction(klusterletconfigsResource, klusterletConfig), &v1alpha1.KlusterletConfig{})
 	if obj == nil {
 		return nil, err
 	}
@@ -78,8 +73,7 @@ func (c *FakeKlusterletConfigs) Create(ctx context.Context, klusterletConfig *v1
 // Update takes the representation of a klusterletConfig and updates it. Returns the server's representation of the klusterletConfig, and an error, if there is any.
 func (c *FakeKlusterletConfigs) Update(ctx context.Context, klusterletConfig *v1alpha1.KlusterletConfig, opts v1.UpdateOptions) (result *v1alpha1.KlusterletConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(klusterletconfigsResource, c.ns, klusterletConfig), &v1alpha1.KlusterletConfig{})
-
+		Invokes(testing.NewRootUpdateAction(klusterletconfigsResource, klusterletConfig), &v1alpha1.KlusterletConfig{})
 	if obj == nil {
 		return nil, err
 	}
@@ -90,8 +84,7 @@ func (c *FakeKlusterletConfigs) Update(ctx context.Context, klusterletConfig *v1
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
 func (c *FakeKlusterletConfigs) UpdateStatus(ctx context.Context, klusterletConfig *v1alpha1.KlusterletConfig, opts v1.UpdateOptions) (*v1alpha1.KlusterletConfig, error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(klusterletconfigsResource, "status", c.ns, klusterletConfig), &v1alpha1.KlusterletConfig{})
-
+		Invokes(testing.NewRootUpdateSubresourceAction(klusterletconfigsResource, "status", klusterletConfig), &v1alpha1.KlusterletConfig{})
 	if obj == nil {
 		return nil, err
 	}
@@ -101,14 +94,13 @@ func (c *FakeKlusterletConfigs) UpdateStatus(ctx context.Context, klusterletConf
 // Delete takes name of the klusterletConfig and deletes it. Returns an error if one occurs.
 func (c *FakeKlusterletConfigs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(klusterletconfigsResource, c.ns, name, opts), &v1alpha1.KlusterletConfig{})
-
+		Invokes(testing.NewRootDeleteActionWithOptions(klusterletconfigsResource, name, opts), &v1alpha1.KlusterletConfig{})
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
 func (c *FakeKlusterletConfigs) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(klusterletconfigsResource, c.ns, listOpts)
+	action := testing.NewRootDeleteCollectionAction(klusterletconfigsResource, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1alpha1.KlusterletConfigList{})
 	return err
@@ -117,8 +109,7 @@ func (c *FakeKlusterletConfigs) DeleteCollection(ctx context.Context, opts v1.De
 // Patch applies the patch and returns the patched klusterletConfig.
 func (c *FakeKlusterletConfigs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.KlusterletConfig, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(klusterletconfigsResource, c.ns, name, pt, data, subresources...), &v1alpha1.KlusterletConfig{})
-
+		Invokes(testing.NewRootPatchSubresourceAction(klusterletconfigsResource, name, pt, data, subresources...), &v1alpha1.KlusterletConfig{})
 	if obj == nil {
 		return nil, err
 	}

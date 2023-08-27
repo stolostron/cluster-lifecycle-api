@@ -20,8 +20,8 @@ type ConfigV1alpha1Client struct {
 	restClient rest.Interface
 }
 
-func (c *ConfigV1alpha1Client) KlusterletConfigs(namespace string) KlusterletConfigInterface {
-	return newKlusterletConfigs(c, namespace)
+func (c *ConfigV1alpha1Client) KlusterletConfigs() KlusterletConfigInterface {
+	return newKlusterletConfigs(c)
 }
 
 // NewForConfig creates a new ConfigV1alpha1Client for the given config.

@@ -17,7 +17,7 @@ import (
 // KlusterletConfigsGetter has a method to return a KlusterletConfigInterface.
 // A group's client should implement this interface.
 type KlusterletConfigsGetter interface {
-	KlusterletConfigs(namespace string) KlusterletConfigInterface
+	KlusterletConfigs() KlusterletConfigInterface
 }
 
 // KlusterletConfigInterface has methods to work with KlusterletConfig resources.
@@ -37,14 +37,12 @@ type KlusterletConfigInterface interface {
 // klusterletConfigs implements KlusterletConfigInterface
 type klusterletConfigs struct {
 	client rest.Interface
-	ns     string
 }
 
 // newKlusterletConfigs returns a KlusterletConfigs
-func newKlusterletConfigs(c *ConfigV1alpha1Client, namespace string) *klusterletConfigs {
+func newKlusterletConfigs(c *ConfigV1alpha1Client) *klusterletConfigs {
 	return &klusterletConfigs{
 		client: c.RESTClient(),
-		ns:     namespace,
 	}
 }
 
@@ -52,7 +50,6 @@ func newKlusterletConfigs(c *ConfigV1alpha1Client, namespace string) *klusterlet
 func (c *klusterletConfigs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.KlusterletConfig, err error) {
 	result = &v1alpha1.KlusterletConfig{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("klusterletconfigs").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
@@ -69,7 +66,6 @@ func (c *klusterletConfigs) List(ctx context.Context, opts v1.ListOptions) (resu
 	}
 	result = &v1alpha1.KlusterletConfigList{}
 	err = c.client.Get().
-		Namespace(c.ns).
 		Resource("klusterletconfigs").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -86,7 +82,6 @@ func (c *klusterletConfigs) Watch(ctx context.Context, opts v1.ListOptions) (wat
 	}
 	opts.Watch = true
 	return c.client.Get().
-		Namespace(c.ns).
 		Resource("klusterletconfigs").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -97,7 +92,6 @@ func (c *klusterletConfigs) Watch(ctx context.Context, opts v1.ListOptions) (wat
 func (c *klusterletConfigs) Create(ctx context.Context, klusterletConfig *v1alpha1.KlusterletConfig, opts v1.CreateOptions) (result *v1alpha1.KlusterletConfig, err error) {
 	result = &v1alpha1.KlusterletConfig{}
 	err = c.client.Post().
-		Namespace(c.ns).
 		Resource("klusterletconfigs").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(klusterletConfig).
@@ -110,7 +104,6 @@ func (c *klusterletConfigs) Create(ctx context.Context, klusterletConfig *v1alph
 func (c *klusterletConfigs) Update(ctx context.Context, klusterletConfig *v1alpha1.KlusterletConfig, opts v1.UpdateOptions) (result *v1alpha1.KlusterletConfig, err error) {
 	result = &v1alpha1.KlusterletConfig{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("klusterletconfigs").
 		Name(klusterletConfig.Name).
 		VersionedParams(&opts, scheme.ParameterCodec).
@@ -125,7 +118,6 @@ func (c *klusterletConfigs) Update(ctx context.Context, klusterletConfig *v1alph
 func (c *klusterletConfigs) UpdateStatus(ctx context.Context, klusterletConfig *v1alpha1.KlusterletConfig, opts v1.UpdateOptions) (result *v1alpha1.KlusterletConfig, err error) {
 	result = &v1alpha1.KlusterletConfig{}
 	err = c.client.Put().
-		Namespace(c.ns).
 		Resource("klusterletconfigs").
 		Name(klusterletConfig.Name).
 		SubResource("status").
@@ -139,7 +131,6 @@ func (c *klusterletConfigs) UpdateStatus(ctx context.Context, klusterletConfig *
 // Delete takes name of the klusterletConfig and deletes it. Returns an error if one occurs.
 func (c *klusterletConfigs) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("klusterletconfigs").
 		Name(name).
 		Body(&opts).
@@ -154,7 +145,6 @@ func (c *klusterletConfigs) DeleteCollection(ctx context.Context, opts v1.Delete
 		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
-		Namespace(c.ns).
 		Resource("klusterletconfigs").
 		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
@@ -167,7 +157,6 @@ func (c *klusterletConfigs) DeleteCollection(ctx context.Context, opts v1.Delete
 func (c *klusterletConfigs) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.KlusterletConfig, err error) {
 	result = &v1alpha1.KlusterletConfig{}
 	err = c.client.Patch(pt).
-		Namespace(c.ns).
 		Resource("klusterletconfigs").
 		Name(name).
 		SubResource(subresources...).
