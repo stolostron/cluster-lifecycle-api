@@ -15,8 +15,9 @@ type KlusterletConfigLister interface {
 	// List lists all KlusterletConfigs in the indexer.
 	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1alpha1.KlusterletConfig, err error)
-	// KlusterletConfigs returns an object that can list and get KlusterletConfigs.
-	KlusterletConfigs(namespace string) KlusterletConfigNamespaceLister
+	// Get retrieves the KlusterletConfig from the index for a given name.
+	// Objects returned here must be treated as read-only.
+	Get(name string) (*v1alpha1.KlusterletConfig, error)
 	KlusterletConfigListerExpansion
 }
 
@@ -38,41 +39,9 @@ func (s *klusterletConfigLister) List(selector labels.Selector) (ret []*v1alpha1
 	return ret, err
 }
 
-// KlusterletConfigs returns an object that can list and get KlusterletConfigs.
-func (s *klusterletConfigLister) KlusterletConfigs(namespace string) KlusterletConfigNamespaceLister {
-	return klusterletConfigNamespaceLister{indexer: s.indexer, namespace: namespace}
-}
-
-// KlusterletConfigNamespaceLister helps list and get KlusterletConfigs.
-// All objects returned here must be treated as read-only.
-type KlusterletConfigNamespaceLister interface {
-	// List lists all KlusterletConfigs in the indexer for a given namespace.
-	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.KlusterletConfig, err error)
-	// Get retrieves the KlusterletConfig from the indexer for a given namespace and name.
-	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.KlusterletConfig, error)
-	KlusterletConfigNamespaceListerExpansion
-}
-
-// klusterletConfigNamespaceLister implements the KlusterletConfigNamespaceLister
-// interface.
-type klusterletConfigNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all KlusterletConfigs in the indexer for a given namespace.
-func (s klusterletConfigNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.KlusterletConfig, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.KlusterletConfig))
-	})
-	return ret, err
-}
-
-// Get retrieves the KlusterletConfig from the indexer for a given namespace and name.
-func (s klusterletConfigNamespaceLister) Get(name string) (*v1alpha1.KlusterletConfig, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
+// Get retrieves the KlusterletConfig from the index for a given name.
+func (s *klusterletConfigLister) Get(name string) (*v1alpha1.KlusterletConfig, error) {
+	obj, exists, err := s.indexer.GetByKey(name)
 	if err != nil {
 		return nil, err
 	}

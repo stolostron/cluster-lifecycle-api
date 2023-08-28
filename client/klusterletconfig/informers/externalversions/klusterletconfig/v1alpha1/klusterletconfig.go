@@ -26,33 +26,32 @@ type KlusterletConfigInformer interface {
 type klusterletConfigInformer struct {
 	factory          internalinterfaces.SharedInformerFactory
 	tweakListOptions internalinterfaces.TweakListOptionsFunc
-	namespace        string
 }
 
 // NewKlusterletConfigInformer constructs a new informer for KlusterletConfig type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewKlusterletConfigInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
-	return NewFilteredKlusterletConfigInformer(client, namespace, resyncPeriod, indexers, nil)
+func NewKlusterletConfigInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers) cache.SharedIndexInformer {
+	return NewFilteredKlusterletConfigInformer(client, resyncPeriod, indexers, nil)
 }
 
 // NewFilteredKlusterletConfigInformer constructs a new informer for KlusterletConfig type.
 // Always prefer using an informer factory to get a shared informer instead of getting an independent
 // one. This reduces memory footprint and number of connections to the server.
-func NewFilteredKlusterletConfigInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
+func NewFilteredKlusterletConfigInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
 		&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ConfigV1alpha1().KlusterletConfigs(namespace).List(context.TODO(), options)
+				return client.ConfigV1alpha1().KlusterletConfigs().List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ConfigV1alpha1().KlusterletConfigs(namespace).Watch(context.TODO(), options)
+				return client.ConfigV1alpha1().KlusterletConfigs().Watch(context.TODO(), options)
 			},
 		},
 		&klusterletconfigv1alpha1.KlusterletConfig{},
@@ -62,7 +61,7 @@ func NewFilteredKlusterletConfigInformer(client versioned.Interface, namespace s
 }
 
 func (f *klusterletConfigInformer) defaultInformer(client versioned.Interface, resyncPeriod time.Duration) cache.SharedIndexInformer {
-	return NewFilteredKlusterletConfigInformer(client, f.namespace, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
+	return NewFilteredKlusterletConfigInformer(client, resyncPeriod, cache.Indexers{cache.NamespaceIndex: cache.MetaNamespaceIndexFunc}, f.tweakListOptions)
 }
 
 func (f *klusterletConfigInformer) Informer() cache.SharedIndexInformer {

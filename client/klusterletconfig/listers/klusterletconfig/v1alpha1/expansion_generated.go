@@ -5,7 +5,3 @@ package v1alpha1
 // KlusterletConfigListerExpansion allows custom methods to be added to
 // KlusterletConfigLister.
 type KlusterletConfigListerExpansion interface{}
-
-// KlusterletConfigNamespaceListerExpansion allows custom methods to be added to
-// KlusterletConfigNamespaceLister.
-type KlusterletConfigNamespaceListerExpansion interface{}

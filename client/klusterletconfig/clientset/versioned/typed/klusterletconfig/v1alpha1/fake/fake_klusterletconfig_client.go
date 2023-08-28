@@ -12,8 +12,8 @@ type FakeConfigV1alpha1 struct {
 	*testing.Fake
 }
 
-func (c *FakeConfigV1alpha1) KlusterletConfigs(namespace string) v1alpha1.KlusterletConfigInterface {
-	return &FakeKlusterletConfigs{c, namespace}
+func (c *FakeConfigV1alpha1) KlusterletConfigs() v1alpha1.KlusterletConfigInterface {
+	return &FakeKlusterletConfigs{c}
 }
 
 // RESTClient returns a RESTClient that is used to communicate

@@ -25,5 +25,5 @@ func New(f internalinterfaces.SharedInformerFactory, namespace string, tweakList
 
 // KlusterletConfigs returns a KlusterletConfigInformer.
 func (v *version) KlusterletConfigs() KlusterletConfigInformer {
-	return &klusterletConfigInformer{factory: v.factory, namespace: v.namespace, tweakListOptions: v.tweakListOptions}
+	return &klusterletConfigInformer{factory: v.factory, tweakListOptions: v.tweakListOptions}
 }
