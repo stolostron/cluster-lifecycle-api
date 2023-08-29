@@ -16,5 +16,5 @@ const (
 	// AnnotationKlusterletConfig is an annotation of ManagedCluster, which references to the name of the
 	// KlusterletConfig adopted by this managed cluster. If it is missing on a ManagedCluster, no KlusterletConfig
 	// will be used for this managed cluster.
-	AnnotationKlusterletConfig string = "agent.open-cluster-management/klustelet-config"
+	AnnotationKlusterletConfig string = "agent.open-cluster-management.io/klusterlet-config"
 )
