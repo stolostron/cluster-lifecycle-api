@@ -48,6 +48,19 @@ type KlusterletConfigSpec struct {
 	// Empty means no proxy settings is available.
 	// +optional
 	HubKubeAPIServerProxyConfig KubeAPIServerProxyConfig `json:"hubKubeAPIServerProxyConfig,omitempty"`
+
+	// HubKubeAPIServerURL is the URL of the hub Kube API server.
+	// If not present, the .status.apiServerURL of Infrastructure/cluster will be used as the default value.
+	// e.g. `oc get infrastructure cluster -o jsonpath='{.status.apiServerURL}'`
+	// +optional
+	HubKubeAPIServerURL string `json:"hubKubeAPIServerEndpoint,omitempty"`
+
+	// HubKubeAPIServerCABundle is the CA bundle to verify the server certificate of the hub kube API
+	// against. If not present, CA bundle will be determined with the logic below:
+	// 1). Use the certificate of the named certificate configured in APIServer/cluster if FQDN matches;
+	// 2). Otherwise use the CA certificates from kube-root-ca.crt ConfigMap in the cluster namespace;
+	// +optional
+	HubKubeAPIServerCABundle []byte `json:"hubKubeAPIServerCABundle,omitempty"`
 }
 
 // KlusterletConfigStatus defines the observed state of KlusterletConfig.

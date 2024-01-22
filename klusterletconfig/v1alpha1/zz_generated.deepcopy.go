@@ -86,6 +86,11 @@ func (in *KlusterletConfigSpec) DeepCopyInto(out *KlusterletConfigSpec) {
 		(*in).DeepCopyInto(*out)
 	}
 	in.HubKubeAPIServerProxyConfig.DeepCopyInto(&out.HubKubeAPIServerProxyConfig)
+	if in.HubKubeAPIServerCABundle != nil {
+		in, out := &in.HubKubeAPIServerCABundle, &out.HubKubeAPIServerCABundle
+		*out = make([]byte, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

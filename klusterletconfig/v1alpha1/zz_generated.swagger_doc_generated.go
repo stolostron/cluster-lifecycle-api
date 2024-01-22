@@ -35,6 +35,8 @@ var map_KlusterletConfigSpec = map[string]string{
 	"pullSecret":                  "PullSecret is the name of image pull secret.",
 	"nodePlacement":               "NodePlacement enables explicit control over the scheduling of the agent components. If the placement is nil, the placement is not specified, it will be omitted. If the placement is an empty object, the placement will match all nodes and tolerate nothing.",
 	"hubKubeAPIServerProxyConfig": "HubKubeAPIServerProxyConfig holds proxy settings for connections between klusterlet/add-on agents on the managed cluster and the kube-apiserver on the hub cluster. Empty means no proxy settings is available.",
+	"hubKubeAPIServerEndpoint":    "HubKubeAPIServerURL is the URL of the hub Kube API server. If not present, the .status.apiServerURL of Infrastructure/cluster will be used as the default value. e.g. `oc get infrastructure cluster -o jsonpath='{.status.apiServerURL}'`",
+	"hubKubeAPIServerCABundle":    "HubKubeAPIServerCABundle is the CA bundle to verify the server certificate of the hub kube API against. If not present, CA bundle will be determined with the logic below: 1). Use the certificate of the named certificate configured in APIServer/cluster if FQDN matches; 2). Otherwise use the CA certificates from kube-root-ca.crt ConfigMap in the cluster namespace;",
 }
 
 func (KlusterletConfigSpec) SwaggerDoc() map[string]string {
