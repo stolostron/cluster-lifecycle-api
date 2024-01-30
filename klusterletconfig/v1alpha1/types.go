@@ -53,7 +53,7 @@ type KlusterletConfigSpec struct {
 	// If not present, the .status.apiServerURL of Infrastructure/cluster will be used as the default value.
 	// e.g. `oc get infrastructure cluster -o jsonpath='{.status.apiServerURL}'`
 	// +optional
-	HubKubeAPIServerURL string `json:"hubKubeAPIServerEndpoint,omitempty"`
+	HubKubeAPIServerURL string `json:"hubKubeAPIServerURL,omitempty"`
 
 	// HubKubeAPIServerCABundle is the CA bundle to verify the server certificate of the hub kube API
 	// against. If not present, CA bundle will be determined with the logic below:
