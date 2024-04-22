@@ -1,4 +1,4 @@
-package klusterlerconfig
+package klusterletconfig
 
 import (
 	"fmt"
@@ -24,16 +24,23 @@ func override(base, toMerge interface{}) (interface{}, error) {
 	return base, nil
 }
 
-// MergeKlusterletConfigs merges multiple KlusterletConfigs into a single KlusterletConfigSpec.
-// The input is a list of KlusterletConfigs instead of a list of KlusterletConfigSpecs
-// because the KlusterletConfigSpec is embedded in the KlusterletConfig.
-func MergeKlusterletConfigs(klusterletconfigs ...*klusterletconfigv1alpha1.KlusterletConfig) (*klusterletconfigv1alpha1.KlusterletConfigSpec, error) {
+// MergeKlusterletConfigs merges multiple KlusterletConfigs into a single KlusterletConfig.
+func MergeKlusterletConfigs(klusterletconfigs ...*klusterletconfigv1alpha1.KlusterletConfig) (*klusterletconfigv1alpha1.KlusterletConfig, error) {
+	// filter out the nil item in the list
+	var filtered []*klusterletconfigv1alpha1.KlusterletConfig
+	for _, kc := range klusterletconfigs {
+		if kc != nil {
+			filtered = append(filtered, kc)
+		}
+	}
+	klusterletconfigs = filtered
+
 	if len(klusterletconfigs) == 0 {
-		return nil, fmt.Errorf("no KlusterletConfigs provided")
+		return nil, nil
 	}
 
 	if len(klusterletconfigs) == 1 {
-		return &klusterletconfigs[0].Spec, nil
+		return klusterletconfigs[0], nil
 	}
 
 	// convert the list of KlusterletConfigSpecs to a list of KlusterletConfigSpecs
@@ -69,5 +76,7 @@ func MergeKlusterletConfigs(klusterletconfigs ...*klusterletconfigv1alpha1.Klust
 		}
 	}
 
-	return merged, nil
+	return &klusterletconfigv1alpha1.KlusterletConfig{
+		Spec: *merged,
+	}, nil
 }

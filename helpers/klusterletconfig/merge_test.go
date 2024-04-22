@@ -1,4 +1,4 @@
-package klusterlerconfig
+package klusterletconfig
 
 import (
 	"reflect"
@@ -32,7 +32,7 @@ func TestMergeKlusterletConfigs(test *testing.T) {
 	testcases := []struct {
 		name     string
 		kcs      []*klusterletconfigv1alpha1.KlusterletConfig
-		expected *klusterletconfigv1alpha1.KlusterletConfigSpec
+		expected *klusterletconfigv1alpha1.KlusterletConfig
 	}{
 		{
 			name: "override strategy: override the base value if next KlusterletConfig in the list has a non-zero value",
@@ -86,27 +86,29 @@ func TestMergeKlusterletConfigs(test *testing.T) {
 					},
 				},
 			},
-			expected: &klusterletconfigv1alpha1.KlusterletConfigSpec{
-				Registries: []klusterletconfigv1alpha1.Registries{
-					{
-						Mirror: "mirror2",
-						Source: "source2",
+			expected: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					Registries: []klusterletconfigv1alpha1.Registries{
+						{
+							Mirror: "mirror2",
+							Source: "source2",
+						},
 					},
-				},
-				PullSecret: corev1.ObjectReference{
-					Name: "pull-secret2",
-				},
-				NodePlacement: &operatorv1.NodePlacement{
-					NodeSelector: map[string]string{
-						"key2": "value2",
+					PullSecret: corev1.ObjectReference{
+						Name: "pull-secret2",
 					},
+					NodePlacement: &operatorv1.NodePlacement{
+						NodeSelector: map[string]string{
+							"key2": "value2",
+						},
+					},
+					HubKubeAPIServerProxyConfig: klusterletconfigv1alpha1.KubeAPIServerProxyConfig{
+						HTTPProxy:  "http://proxy2",
+						HTTPSProxy: "https://proxy2",
+					},
+					HubKubeAPIServerURL:      "https://hub2",
+					HubKubeAPIServerCABundle: []byte("ca-bundle2"),
 				},
-				HubKubeAPIServerProxyConfig: klusterletconfigv1alpha1.KubeAPIServerProxyConfig{
-					HTTPProxy:  "http://proxy2",
-					HTTPSProxy: "https://proxy2",
-				},
-				HubKubeAPIServerURL:      "https://hub2",
-				HubKubeAPIServerCABundle: []byte("ca-bundle2"),
 			},
 		},
 		{
@@ -147,27 +149,29 @@ func TestMergeKlusterletConfigs(test *testing.T) {
 					},
 				},
 			},
-			expected: &klusterletconfigv1alpha1.KlusterletConfigSpec{
-				Registries: []klusterletconfigv1alpha1.Registries{
-					{
-						Mirror: "mirror2",
-						Source: "source2",
+			expected: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					Registries: []klusterletconfigv1alpha1.Registries{
+						{
+							Mirror: "mirror2",
+							Source: "source2",
+						},
 					},
-				},
-				PullSecret: corev1.ObjectReference{
-					Name: "pull-secret2",
-				},
-				NodePlacement: &operatorv1.NodePlacement{
-					NodeSelector: map[string]string{
-						"key2": "value2",
+					PullSecret: corev1.ObjectReference{
+						Name: "pull-secret2",
 					},
+					NodePlacement: &operatorv1.NodePlacement{
+						NodeSelector: map[string]string{
+							"key2": "value2",
+						},
+					},
+					HubKubeAPIServerProxyConfig: klusterletconfigv1alpha1.KubeAPIServerProxyConfig{
+						HTTPProxy:  "http://proxy2",
+						HTTPSProxy: "https://proxy2",
+					},
+					HubKubeAPIServerURL:      "https://hub2",
+					HubKubeAPIServerCABundle: []byte("ca-bundle2"),
 				},
-				HubKubeAPIServerProxyConfig: klusterletconfigv1alpha1.KubeAPIServerProxyConfig{
-					HTTPProxy:  "http://proxy2",
-					HTTPSProxy: "https://proxy2",
-				},
-				HubKubeAPIServerURL:      "https://hub2",
-				HubKubeAPIServerCABundle: []byte("ca-bundle2"),
 			},
 		},
 	}
