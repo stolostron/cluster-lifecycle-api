@@ -30,13 +30,14 @@ func (KlusterletConfigList) SwaggerDoc() map[string]string {
 }
 
 var map_KlusterletConfigSpec = map[string]string{
-	"":                            "KlusterletConfigSpec defines the desired state of KlusterletConfig, usually provided by the user.",
-	"registries":                  "Registries includes the mirror and source registries. The source registry will be replaced by the Mirror.",
-	"pullSecret":                  "PullSecret is the name of image pull secret.",
-	"nodePlacement":               "NodePlacement enables explicit control over the scheduling of the agent components. If the placement is nil, the placement is not specified, it will be omitted. If the placement is an empty object, the placement will match all nodes and tolerate nothing.",
-	"hubKubeAPIServerProxyConfig": "HubKubeAPIServerProxyConfig holds proxy settings for connections between klusterlet/add-on agents on the managed cluster and the kube-apiserver on the hub cluster. Empty means no proxy settings is available.",
-	"hubKubeAPIServerURL":         "HubKubeAPIServerURL is the URL of the hub Kube API server. If not present, the .status.apiServerURL of Infrastructure/cluster will be used as the default value. e.g. `oc get infrastructure cluster -o jsonpath='{.status.apiServerURL}'`",
-	"hubKubeAPIServerCABundle":    "HubKubeAPIServerCABundle is the CA bundle to verify the server certificate of the hub kube API against. If not present, CA bundle will be determined with the logic below: 1). Use the certificate of the named certificate configured in APIServer/cluster if FQDN matches; 2). Otherwise use the CA certificates from kube-root-ca.crt ConfigMap in the cluster namespace;",
+	"":                                       "KlusterletConfigSpec defines the desired state of KlusterletConfig, usually provided by the user.",
+	"registries":                             "Registries includes the mirror and source registries. The source registry will be replaced by the Mirror.",
+	"pullSecret":                             "PullSecret is the name of image pull secret.",
+	"nodePlacement":                          "NodePlacement enables explicit control over the scheduling of the agent components. If the placement is nil, the placement is not specified, it will be omitted. If the placement is an empty object, the placement will match all nodes and tolerate nothing.",
+	"hubKubeAPIServerProxyConfig":            "HubKubeAPIServerProxyConfig holds proxy settings for connections between klusterlet/add-on agents on the managed cluster and the kube-apiserver on the hub cluster. Empty means no proxy settings is available.",
+	"hubKubeAPIServerURL":                    "HubKubeAPIServerURL is the URL of the hub Kube API server. If not present, the .status.apiServerURL of Infrastructure/cluster will be used as the default value. e.g. `oc get infrastructure cluster -o jsonpath='{.status.apiServerURL}'`",
+	"hubKubeAPIServerCABundle":               "HubKubeAPIServerCABundle is the CA bundle to verify the server certificate of the hub kube API against. If not present, CA bundle will be determined with the logic below: 1). Use the certificate of the named certificate configured in APIServer/cluster if FQDN matches; 2). Otherwise use the CA certificates from kube-root-ca.crt ConfigMap in the cluster namespace;",
+	"appliedManifestWorkEvictionGracePeriod": "AppliedManifestWorkEvictionGracePeriod is the eviction grace period the work agent will wait before evicting the AppliedManifestWorks, whose corresponding ManifestWorks are missing on the hub cluster, from the managed cluster. If not present, the default value of the work agent will be used. If its value is set to \"INFINITE\", it means the AppliedManifestWorks will never been evicted from the managed cluster.",
 }
 
 func (KlusterletConfigSpec) SwaggerDoc() map[string]string {

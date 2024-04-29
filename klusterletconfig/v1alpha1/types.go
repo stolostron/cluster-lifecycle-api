@@ -61,6 +61,14 @@ type KlusterletConfigSpec struct {
 	// 2). Otherwise use the CA certificates from kube-root-ca.crt ConfigMap in the cluster namespace;
 	// +optional
 	HubKubeAPIServerCABundle []byte `json:"hubKubeAPIServerCABundle,omitempty"`
+
+	// AppliedManifestWorkEvictionGracePeriod is the eviction grace period the work agent will wait before
+	// evicting the AppliedManifestWorks, whose corresponding ManifestWorks are missing on the hub cluster, from
+	// the managed cluster. If not present, the default value of the work agent will be used. If its value is
+	// set to "INFINITE", it means the AppliedManifestWorks will never been evicted from the managed cluster.
+	// +optional
+	// +kubebuilder:validation:Pattern=`^([0-9]+(s|m|h))+$|^INFINITE$`
+	AppliedManifestWorkEvictionGracePeriod string `json:"appliedManifestWorkEvictionGracePeriod,omitempty"`
 }
 
 // KlusterletConfigStatus defines the observed state of KlusterletConfig.
