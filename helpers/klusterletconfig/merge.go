@@ -8,12 +8,13 @@ import (
 )
 
 var klusterletConfigMergeFuncs map[string]func(base, override interface{}) (interface{}, error) = map[string]func(base, override interface{}) (interface{}, error){
-	"Registries":                  override,
-	"PullSecret":                  override,
-	"NodePlacement":               override,
-	"HubKubeAPIServerProxyConfig": override,
-	"HubKubeAPIServerURL":         override,
-	"HubKubeAPIServerCABundle":    override,
+	"Registries":                             override,
+	"PullSecret":                             override,
+	"NodePlacement":                          override,
+	"HubKubeAPIServerProxyConfig":            override,
+	"HubKubeAPIServerURL":                    override,
+	"HubKubeAPIServerCABundle":               override,
+	"AppliedManifestWorkEvictionGracePeriod": override,
 }
 
 func override(base, toMerge interface{}) (interface{}, error) {
