@@ -38,6 +38,7 @@ var map_KlusterletConfigSpec = map[string]string{
 	"hubKubeAPIServerURL":                    "HubKubeAPIServerURL is the URL of the hub Kube API server. If not present, the .status.apiServerURL of Infrastructure/cluster will be used as the default value. e.g. `oc get infrastructure cluster -o jsonpath='{.status.apiServerURL}'`",
 	"hubKubeAPIServerCABundle":               "HubKubeAPIServerCABundle is the CA bundle to verify the server certificate of the hub kube API against. If not present, CA bundle will be determined with the logic below: 1). Use the certificate of the named certificate configured in APIServer/cluster if FQDN matches; 2). Otherwise use the CA certificates from kube-root-ca.crt ConfigMap in the cluster namespace;",
 	"appliedManifestWorkEvictionGracePeriod": "AppliedManifestWorkEvictionGracePeriod is the eviction grace period the work agent will wait before evicting the AppliedManifestWorks, whose corresponding ManifestWorks are missing on the hub cluster, from the managed cluster. If not present, the default value of the work agent will be used. If its value is set to \"INFINITE\", it means the AppliedManifestWorks will never been evicted from the managed cluster.",
+	"agentInstallNamespace":                  "AgentInstallNamespace is the namespace to install klusterlet agent on the managed cluster. In hosted mode, it is the namespace on the managed cluster for service account of the agent. if it is not set, open-cluster-management-agent namespace will be used.",
 }
 
 func (KlusterletConfigSpec) SwaggerDoc() map[string]string {

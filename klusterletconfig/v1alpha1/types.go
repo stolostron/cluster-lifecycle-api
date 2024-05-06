@@ -69,6 +69,14 @@ type KlusterletConfigSpec struct {
 	// +optional
 	// +kubebuilder:validation:Pattern=`^([0-9]+(s|m|h))+$|^INFINITE$`
 	AppliedManifestWorkEvictionGracePeriod string `json:"appliedManifestWorkEvictionGracePeriod,omitempty"`
+
+	// AgentInstallNamespace is the namespace to install klusterlet agent on the managed cluster. In hosted mode,
+	// it is the namespace on the managed cluster for service account of the agent. if it is not set,
+	// open-cluster-management-agent namespace will be used.
+	// +optional
+	// +kubebuilder:validation:MaxLength=57
+	// +kubebuilder:validation:Pattern=^open-cluster-management-[-a-z0-9]*[a-z0-9]$
+	AgentInstallNamespace string `json:"agentInstallNamespace,omitempty"`
 }
 
 // KlusterletConfigStatus defines the observed state of KlusterletConfig.
