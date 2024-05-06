@@ -36,6 +36,14 @@ spec:
           spec:
             description: Spec defines the desired state of KlusterletConfig
             properties:
+              agentInstallNamespace:
+                description: AgentInstallNamespace is the namespace to install klusterlet
+                  agent on the managed cluster. In hosted mode, it is the namespace
+                  on the managed cluster for service account of the agent. if it is
+                  not set, open-cluster-management-agent namespace will be used.
+                maxLength: 57
+                pattern: ^open-cluster-management-[-a-z0-9]*[a-z0-9]$
+                type: string
               appliedManifestWorkEvictionGracePeriod:
                 description: AppliedManifestWorkEvictionGracePeriod is the eviction
                   grace period the work agent will wait before evicting the AppliedManifestWorks,
