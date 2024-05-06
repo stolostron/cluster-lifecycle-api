@@ -31,7 +31,7 @@ func MergeKlusterletConfigs(klusterletconfigs ...*klusterletconfigv1alpha1.Klust
 	var filtered []*klusterletconfigv1alpha1.KlusterletConfig
 	for _, kc := range klusterletconfigs {
 		if kc != nil {
-			filtered = append(filtered, kc)
+			filtered = append(filtered, kc.DeepCopy())
 		}
 	}
 	klusterletconfigs = filtered
