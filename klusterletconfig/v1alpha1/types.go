@@ -70,17 +70,43 @@ type KlusterletConfigSpec struct {
 	// +kubebuilder:validation:Pattern=`^([0-9]+(s|m|h))+$|^INFINITE$`
 	AppliedManifestWorkEvictionGracePeriod string `json:"appliedManifestWorkEvictionGracePeriod,omitempty"`
 
-	// AgentInstallNamespace is the namespace to install klusterlet agent on the managed cluster. In hosted mode,
-	// it is the namespace on the managed cluster for service account of the agent. if it is not set,
-	// open-cluster-management-agent namespace will be used.
-	// +optional
-	// +kubebuilder:validation:MaxLength=57
-	// +kubebuilder:validation:Pattern=^open-cluster-management-[-a-z0-9]*[a-z0-9]$
-	AgentInstallNamespace string `json:"agentInstallNamespace,omitempty"`
+	// InstallMode is the mode to install the klusterlet
+	InstallMode *InstallMode `json:"installMode,omitempty"`
 }
 
 // KlusterletConfigStatus defines the observed state of KlusterletConfig.
 type KlusterletConfigStatus struct {
+}
+
+type InstallMode struct {
+	// InstallModeType is the type of install mode.
+	// +kubebuilder:default=default
+	// +kubebuilder:validation:Enum=default;noOperator
+	Type InstallModeType `json:"type,omitempty"`
+
+	// NoOperator is the setting of klusterlet installation when install type is noOperator.
+	NoOperator *NoOperator `json:"noOperator,omitempty"`
+}
+
+type InstallModeType string
+
+const (
+	// InstallModeDefault is the default mode to install klusterlet, the name of the Klusterlet resource
+	// is klusterlet and the klusterlet namespace is open-cluster-management-agent.
+	InstallModeDefault InstallModeType = "default"
+	// InstallModeNoOperator is to install klusterlet without installing klusterlet operator. The name of
+	// the klusterlet is by default klusterlet and can be set to klusterlet-{KlusterletNamePostFix}. The
+	// install namespace of the klusterlet is open-cluster-management-{KlusterletNamePostFix}
+	InstallModeNoOperator InstallModeType = "noOperator"
+)
+
+type NoOperator struct {
+	// Postfix is the postfix of the klusterlet name. The name of the klusterlet is "klusterlet" if
+	// it is not set, and "klusterlet-{Postfix}". The install namespace is "open-cluster-management-agent"
+	// if it is not set, and "open-cluster-management-{Postfix}".
+	// +kubebuilder:validation:MaxLength=33
+	// +kubebuilder:validation:Pattern=^[-a-z0-9]*[a-z0-9]$
+	Postfix string `json:"postfix,omitempty"`
 }
 
 type Registries struct {
