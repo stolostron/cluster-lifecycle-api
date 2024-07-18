@@ -8,7 +8,6 @@ import (
 	v1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -19,9 +18,9 @@ type FakeKlusterletConfigs struct {
 	Fake *FakeConfigV1alpha1
 }
 
-var klusterletconfigsResource = schema.GroupVersionResource{Group: "config.open-cluster-management.io", Version: "v1alpha1", Resource: "klusterletconfigs"}
+var klusterletconfigsResource = v1alpha1.SchemeGroupVersion.WithResource("klusterletconfigs")
 
-var klusterletconfigsKind = schema.GroupVersionKind{Group: "config.open-cluster-management.io", Version: "v1alpha1", Kind: "KlusterletConfig"}
+var klusterletconfigsKind = v1alpha1.SchemeGroupVersion.WithKind("KlusterletConfig")
 
 // Get takes name of the klusterletConfig, and returns the corresponding klusterletConfig object, and an error if there is any.
 func (c *FakeKlusterletConfigs) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.KlusterletConfig, err error) {

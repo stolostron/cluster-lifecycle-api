@@ -7,9 +7,10 @@ CODEGEN_PKG=${CODEGEN_PKG:-$(cd ${SCRIPT_ROOT}; ls -d -1 ./vendor/k8s.io/code-ge
 
 verify="${VERIFY:-}"
 
-GOFLAGS="" bash ${CODEGEN_PKG}/generate-groups.sh "deepcopy" \
-  github.com/stolostron/cluster-lifecycle-api/generated \
-  github.com/stolostron/cluster-lifecycle-api \
-  "action:v1beta1 view:v1beta1 clusterinfo:v1beta1 imageregistry:v1alpha1 klusterletconfig:v1alpha1" \
-  --go-header-file ${SCRIPT_ROOT}/hack/empty.txt \
-  ${verify}
+source "${CODEGEN_PKG}/kube_codegen.sh"
+
+for group in action view clusterinfo imageregistry klusterletconfig; do
+  kube::codegen::gen_helpers \
+    --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.txt" \
+    ${group}
+done

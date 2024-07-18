@@ -8,7 +8,6 @@ import (
 	v1beta1 "github.com/stolostron/cluster-lifecycle-api/clusterinfo/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -20,9 +19,9 @@ type FakeManagedClusterInfos struct {
 	ns   string
 }
 
-var managedclusterinfosResource = schema.GroupVersionResource{Group: "internal.open-cluster-management.io", Version: "v1beta1", Resource: "managedclusterinfos"}
+var managedclusterinfosResource = v1beta1.SchemeGroupVersion.WithResource("managedclusterinfos")
 
-var managedclusterinfosKind = schema.GroupVersionKind{Group: "internal.open-cluster-management.io", Version: "v1beta1", Kind: "ManagedClusterInfo"}
+var managedclusterinfosKind = v1beta1.SchemeGroupVersion.WithKind("ManagedClusterInfo")
 
 // Get takes name of the managedClusterInfo, and returns the corresponding managedClusterInfo object, and an error if there is any.
 func (c *FakeManagedClusterInfos) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.ManagedClusterInfo, err error) {

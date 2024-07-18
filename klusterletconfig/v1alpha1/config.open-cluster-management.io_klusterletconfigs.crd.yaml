@@ -120,8 +120,8 @@ spec:
                       on. The default is an empty list.
                     type: object
                   tolerations:
-                    description: Tolerations is attached by pods to tolerate any taint
-                      that matches the triple <key,value,effect> using the matching
+                    description: Tolerations are attached by pods to tolerate any
+                      taint that matches the triple <key,value,effect> using the matching
                       operator <operator>. The default is an empty list.
                     items:
                       description: The pod this Toleration is attached to tolerates
@@ -199,6 +199,7 @@ spec:
                     description: 'UID of the referent. More info: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#uids'
                     type: string
                 type: object
+                x-kubernetes-map-type: atomic
               registries:
                 description: Registries includes the mirror and source registries.
                   The source registry will be replaced by the Mirror.
