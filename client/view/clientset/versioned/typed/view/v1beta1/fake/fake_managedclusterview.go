@@ -8,7 +8,6 @@ import (
 	v1beta1 "github.com/stolostron/cluster-lifecycle-api/view/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
-	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	types "k8s.io/apimachinery/pkg/types"
 	watch "k8s.io/apimachinery/pkg/watch"
 	testing "k8s.io/client-go/testing"
@@ -20,9 +19,9 @@ type FakeManagedClusterViews struct {
 	ns   string
 }
 
-var managedclusterviewsResource = schema.GroupVersionResource{Group: "view.open-cluster-management.io", Version: "v1beta1", Resource: "managedclusterviews"}
+var managedclusterviewsResource = v1beta1.SchemeGroupVersion.WithResource("managedclusterviews")
 
-var managedclusterviewsKind = schema.GroupVersionKind{Group: "view.open-cluster-management.io", Version: "v1beta1", Kind: "ManagedClusterView"}
+var managedclusterviewsKind = v1beta1.SchemeGroupVersion.WithKind("ManagedClusterView")
 
 // Get takes name of the managedClusterView, and returns the corresponding managedClusterView object, and an error if there is any.
 func (c *FakeManagedClusterViews) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.ManagedClusterView, err error) {
