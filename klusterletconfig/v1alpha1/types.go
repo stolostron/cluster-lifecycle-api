@@ -72,6 +72,10 @@ type KlusterletConfigSpec struct {
 
 	// InstallMode is the mode to install the klusterlet
 	InstallMode *InstallMode `json:"installMode,omitempty"`
+
+	// BootstrapKubeConfigSecrets is the list of secrets that reflects the
+	// Klusterlet.Spec.RegistrationConfiguration.BootstrapKubeConfigs.
+	BootstrapKubeConfigs operatorv1.BootstrapKubeConfigs `json:"bootstrapKubeConfigs,omitempty"`
 }
 
 // KlusterletConfigStatus defines the observed state of KlusterletConfig.

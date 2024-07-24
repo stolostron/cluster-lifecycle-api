@@ -117,6 +117,7 @@ func (in *KlusterletConfigSpec) DeepCopyInto(out *KlusterletConfigSpec) {
 		*out = new(InstallMode)
 		(*in).DeepCopyInto(*out)
 	}
+	in.BootstrapKubeConfigs.DeepCopyInto(&out.BootstrapKubeConfigs)
 	return
 }
 
