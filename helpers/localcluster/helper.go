@@ -7,8 +7,8 @@ import (
 	clusterv1 "open-cluster-management.io/api/cluster/v1"
 )
 
-func IsClusterSelfManaged(cluster *clusterv1.ManagedCluster) bool {
-	if len(cluster.Labels) == 0 {
+func IsClusterSelfManaged(clusterLabels map[string]string) bool {
+	if len(clusterLabels) == 0 {
 		return false
 	}
 	val, ok := cluster.Labels[constants.SelfManagedClusterLabelKey]

@@ -75,7 +75,7 @@ func TestIsClusterSelfManaged(t *testing.T) {
 
 	for _, testcase := range tcs {
 		t.Run(testcase.name, func(test *testing.T) {
-			result := IsClusterSelfManaged(testcase.cluster)
+			result := IsClusterSelfManaged(testcase.cluster.La)
 			if testcase.expect != result {
 				t.Errorf("expect result is %t, got %t", testcase.expect, result)
 			}
