@@ -148,8 +148,8 @@ type KubeAPIServerConfig struct {
 	URL string `json:"url,omitempty"`
 
 	// ServerVerificationStrategy is the strategy used for verifying the server certification
-	// +kubebuilder:default=use-auto-detected-truststore
-	// +kubebuilder:validation:Enum=use-system-truststore;use-auto-detected-truststore;use-custom-ca-bundles
+	// +kubebuilder:default=default
+	// +kubebuilder:validation:Enum=use-system-truststore;use-auto-detected-truststore;use-custom-ca-bundles;default
 	// +optional
 	ServerVerificationStrategy ServerVerificationStrategy `json:"serverVerificationStrategy,omitempty"`
 
@@ -202,6 +202,11 @@ const (
 	// ServerVerificationStrategyUseCustomCABundles is the strategy that uses CA certificates from a custom CA bundle
 	// to validate the server certificate.
 	ServerVerificationStrategyUseCustomCABundles ServerVerificationStrategy = "use-custom-ca-bundles"
+
+	// ServerVerificationStrategyDefault is the default strategy for server certificate verification; if there is only
+	// one klusterletConfig configured for a cluster, the strategy is eaual to "use-auto-detected-truststore", if there
+	// are more than one klusterletConfigs, this strategy will be overrided by other strategies.
+	ServerVerificationStrategyDefault ServerVerificationStrategy = "default"
 )
 
 type ConfigMapReference struct {

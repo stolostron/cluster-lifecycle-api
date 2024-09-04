@@ -110,13 +110,14 @@ spec:
                       you may also need to add the necessary CA certificates to TrustedCABundles.
                     type: string
                   serverVerificationStrategy:
-                    default: use-auto-detected-truststore
+                    default: default
                     description: ServerVerificationStrategy is the strategy used for
                       verifying the server certification
                     enum:
                     - use-system-truststore
                     - use-auto-detected-truststore
                     - use-custom-ca-bundles
+                    - default
                     type: string
                   trustedCABundles:
                     description: TrustedCABundles refers to a collection of user-provided

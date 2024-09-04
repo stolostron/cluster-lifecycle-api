@@ -17,7 +17,7 @@ var klusterletConfigMergeFuncs map[string]func(base, override interface{}) (inte
 	"AppliedManifestWorkEvictionGracePeriod": override,
 	"InstallMode":                            override,
 	"BootstrapKubeConfigs":                   override,
-	"HubKubeAPIServerConfig":                 override,
+	"HubKubeAPIServerConfig":                 mergeHubKubeAPIServerConfig,
 }
 
 func override(base, toMerge interface{}) (interface{}, error) {
@@ -83,4 +83,50 @@ func MergeKlusterletConfigs(klusterletconfigs ...*klusterletconfigv1alpha1.Klust
 	return &klusterletconfigv1alpha1.KlusterletConfig{
 		Spec: *merged,
 	}, nil
+}
+
+func mergeHubKubeAPIServerConfig(base, toMerge interface{}) (interface{}, error) {
+	old, ok := base.(*klusterletconfigv1alpha1.KubeAPIServerConfig)
+	if !ok {
+		return nil, fmt.Errorf("base is not of type KubeAPIServerConfig")
+	}
+	new, ok := toMerge.(*klusterletconfigv1alpha1.KubeAPIServerConfig)
+	if !ok {
+		return nil, fmt.Errorf("toMerge is not of type KubeAPIServerConfig")
+	}
+	if old == nil {
+		return new, nil
+	}
+	if new == nil {
+		return old, nil
+	}
+
+	config := new.DeepCopy()
+	if len(new.URL) == 0 {
+		config.URL = old.URL
+	}
+	if len(new.ProxyURL) == 0 {
+		config.ProxyURL = old.ProxyURL
+	}
+
+	if config.ServerVerificationStrategy == klusterletconfigv1alpha1.ServerVerificationStrategyDefault {
+		config.ServerVerificationStrategy = old.ServerVerificationStrategy
+	}
+
+	for _, caBundle := range old.TrustedCABundles {
+		if !containsCA(config.TrustedCABundles, caBundle) {
+			config.TrustedCABundles = append(config.TrustedCABundles, caBundle)
+		}
+	}
+
+	return config, nil
+}
+
+func containsCA(bundles []klusterletconfigv1alpha1.CABundle, bundle klusterletconfigv1alpha1.CABundle) bool {
+	for _, b := range bundles {
+		if b.Name == bundle.Name {
+			return true
+		}
+	}
+	return false
 }
