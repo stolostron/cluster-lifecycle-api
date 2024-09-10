@@ -73,7 +73,7 @@ type KlusterletConfigSpec struct {
 	// 2). Otherwise use the CA certificates from kube-root-ca.crt ConfigMap in the cluster namespace;
 	//
 	// Deprecated and maintained for backward compatibility, use HubKubeAPIServerConfig.ServerVarificationStrategy
-	// and HubKubeAPIServerConfig.CustomCAData instead
+	// and HubKubeAPIServerConfig.TrustedCABundles instead
 	// +optional
 	HubKubeAPIServerCABundle []byte `json:"hubKubeAPIServerCABundle,omitempty"`
 
@@ -149,13 +149,13 @@ type KubeAPIServerConfig struct {
 
 	// ServerVerificationStrategy is the strategy used for verifying the server certification
 	// +kubebuilder:default=default
-	// +kubebuilder:validation:Enum=use-system-truststore;use-auto-detected-truststore;use-custom-ca-bundles;default
+	// +kubebuilder:validation:Enum=UseSystemTruststore;UseAutoDetectedCABundle;UseCustomCABundles;Default
 	// +optional
 	ServerVerificationStrategy ServerVerificationStrategy `json:"serverVerificationStrategy,omitempty"`
 
 	// TrustedCABundles refers to a collection of user-provided CA bundles used for verifying the server
 	// certificate of the hub Kubernetes API
-	// If the ServerVerificationStrategy is set to "use-system-truststore", this field will be ignored.
+	// If the ServerVerificationStrategy is set to "UseSystemTruststore", this field will be ignored.
 	// Otherwise, the CA certificates from the configured bundles will be appended to the klusterlet CA bundle.
 	// +listType:=map
 	// +listMapKey:=name
@@ -171,7 +171,8 @@ type KubeAPIServerConfig struct {
 
 // CABundle is a user-provided CA bundle
 type CABundle struct {
-	// Name is the identifier used to reference the CA bundle
+	// Name is the identifier used to reference the CA bundle; Do not use "auto-detected" as the name
+	// since it is the reserved name for the auto-detected CA bundle.
 	// +kubebuilder:validation:Required
 	// +required
 	Name string `json:"name,omitempty"`
@@ -180,8 +181,9 @@ type CABundle struct {
 	// +optional
 	CABundleData []byte `json:"caBundleData,omitempty"`
 
-	// CABundle refers to a ConfigMap containing the user-provided CA bundle
-	// The key of the CA data must be "ca-bundle.crt".
+	// CABundle refers to a ConfigMap with label "import.open-cluster-management.io/ca-bundle"
+	// containing the user-provided CA bundle
+	// The key of the CA data could be "ca-bundle.crt", "ca.crt", or "tls.crt".
 	// This field will be ignored if the CABundleData field is also present.
 	// +optional
 	CABundle *ConfigMapReference `json:"caBundle,omitempty"`
@@ -193,20 +195,20 @@ type ServerVerificationStrategy string
 const (
 	// ServerVerificationStrategyUseSystemTruststore is the strategy that utilizes CA certificates in the system
 	// truststore of the Operating System to validate the server certificate.
-	ServerVerificationStrategyUseSystemTruststore ServerVerificationStrategy = "use-system-truststore"
+	ServerVerificationStrategyUseSystemTruststore ServerVerificationStrategy = "UseSystemTruststore"
 
-	// ServerVerificationStrategyUseAutoDetectedTruststore is the strategy that automatically detects CA certificates
+	// ServerVerificationStrategyUseAutoDetectedCABundle is the strategy that automatically detects CA certificates
 	// for the hub Kube API server and uses them to validate the server certificate.
-	ServerVerificationStrategyUseAutoDetectedTruststore ServerVerificationStrategy = "use-auto-detected-truststore"
+	ServerVerificationStrategyUseAutoDetectedCABundle ServerVerificationStrategy = "UseAutoDetectedCABundle"
 
 	// ServerVerificationStrategyUseCustomCABundles is the strategy that uses CA certificates from a custom CA bundle
 	// to validate the server certificate.
-	ServerVerificationStrategyUseCustomCABundles ServerVerificationStrategy = "use-custom-ca-bundles"
+	ServerVerificationStrategyUseCustomCABundles ServerVerificationStrategy = "UseCustomCABundles"
 
 	// ServerVerificationStrategyDefault is the default strategy for server certificate verification; if there is only
-	// one klusterletConfig configured for a cluster, the strategy is eaual to "use-auto-detected-truststore", if there
+	// one klusterletConfig configured for a cluster, the strategy is eaual to "UseAutoDetectedCABundle", if there
 	// are more than one klusterletConfigs, this strategy will be overrided by other strategies.
-	ServerVerificationStrategyDefault ServerVerificationStrategy = "default"
+	ServerVerificationStrategyDefault ServerVerificationStrategy = "Default"
 )
 
 type ConfigMapReference struct {
