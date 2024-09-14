@@ -204,7 +204,13 @@ func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 				URL:                        "http://apiserver.com",
 				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
 				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
-					{Name: "ca-bundle", CABundleData: []byte("ca-bundle")},
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
 				},
 				ProxyURL: "http://proxy",
 			},
@@ -212,7 +218,13 @@ func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 				URL:                        "http://apiserver.com",
 				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
 				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
-					{Name: "ca-bundle", CABundleData: []byte("ca-bundle")},
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
 				},
 				ProxyURL: "http://proxy",
 			},
@@ -223,7 +235,13 @@ func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 				URL:                        "http://apiserver.com",
 				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
 				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
-					{Name: "ca-bundle", CABundleData: []byte("ca-bundle")},
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
 				},
 				ProxyURL: "http://proxy",
 			},
@@ -232,7 +250,13 @@ func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 				URL:                        "http://apiserver.com",
 				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
 				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
-					{Name: "ca-bundle", CABundleData: []byte("ca-bundle")},
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
 				},
 				ProxyURL: "http://proxy",
 			},
@@ -243,7 +267,13 @@ func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 				URL:                        "http://apiserver.com",
 				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
 				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
-					{Name: "ca-bundle", CABundleData: []byte("ca-bundle")},
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
 				},
 				ProxyURL: "http://proxy",
 			},
@@ -251,7 +281,13 @@ func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 				URL:                        "http://new-apiserver.com",
 				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseSystemTruststore,
 				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
-					{Name: "ca-bundle-new", CABundleData: []byte("ca-bundle-new")},
+					{
+						Name: "ca-bundle-new",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns2",
+							Name:      "n2",
+						},
+					},
 				},
 				ProxyURL: "http://proxy-new",
 			},
@@ -259,8 +295,20 @@ func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 				URL:                        "http://new-apiserver.com",
 				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseSystemTruststore,
 				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
-					{Name: "ca-bundle-new", CABundleData: []byte("ca-bundle-new")},
-					{Name: "ca-bundle", CABundleData: []byte("ca-bundle")},
+					{
+						Name: "ca-bundle-new",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns2",
+							Name:      "n2",
+						},
+					},
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
 				},
 				ProxyURL: "http://proxy-new",
 			},
@@ -271,15 +319,27 @@ func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 				URL:                        "http://apiserver.com",
 				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
 				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
-					{Name: "ca-bundle", CABundleData: []byte("ca-bundle")},
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
 				},
 				ProxyURL: "http://proxy",
 			},
 			new: &klusterletconfigv1alpha1.KubeAPIServerConfig{
 				URL:                        "http://new-apiserver.com",
-				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyDefault,
+				ServerVerificationStrategy: "",
 				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
-					{Name: "ca-bundle-new", CABundleData: []byte("ca-bundle-new")},
+					{
+						Name: "ca-bundle-new",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns2",
+							Name:      "n2",
+						},
+					},
 				},
 				ProxyURL: "http://proxy-new",
 			},
@@ -287,8 +347,20 @@ func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 				URL:                        "http://new-apiserver.com",
 				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
 				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
-					{Name: "ca-bundle-new", CABundleData: []byte("ca-bundle-new")},
-					{Name: "ca-bundle", CABundleData: []byte("ca-bundle")},
+					{
+						Name: "ca-bundle-new",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns2",
+							Name:      "n2",
+						},
+					},
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
 				},
 				ProxyURL: "http://proxy-new",
 			},

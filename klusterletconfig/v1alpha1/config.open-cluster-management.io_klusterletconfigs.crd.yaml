@@ -110,14 +110,18 @@ spec:
                       you may also need to add the necessary CA certificates to TrustedCABundles.
                     type: string
                   serverVerificationStrategy:
-                    default: default
-                    description: ServerVerificationStrategy is the strategy used for
-                      verifying the server certification
+                    description: "ServerVerificationStrategy is the strategy used
+                      for verifying the server certification; The value could be \"UseSystemTruststore\",
+                      \"UseAutoDetectedCABundle\", \"UseCustomCABundles\", empty.
+                      \n When this strategy is not set or value is empty; if there
+                      is only one klusterletConfig configured for a cluster, the strategy
+                      is eaual to \"UseAutoDetectedCABundle\", if there are more than
+                      one klusterletConfigs, the empty strategy will be overrided
+                      by other non-empty strategies."
                     enum:
                     - UseSystemTruststore
                     - UseAutoDetectedCABundle
                     - UseCustomCABundles
-                    - Default
                     type: string
                   trustedCABundles:
                     description: TrustedCABundles refers to a collection of user-provided
@@ -133,8 +137,6 @@ spec:
                           description: CABundle refers to a ConfigMap with label "import.open-cluster-management.io/ca-bundle"
                             containing the user-provided CA bundle The key of the
                             CA data could be "ca-bundle.crt", "ca.crt", or "tls.crt".
-                            This field will be ignored if the CABundleData field is
-                            also present.
                           properties:
                             name:
                               description: name is the metadata.name of the referenced
@@ -148,17 +150,13 @@ spec:
                           - name
                           - namespace
                           type: object
-                        caBundleData:
-                          description: CABundleData is base64 encoded certificate
-                            data
-                          format: byte
-                          type: string
                         name:
                           description: Name is the identifier used to reference the
                             CA bundle; Do not use "auto-detected" as the name since
                             it is the reserved name for the auto-detected CA bundle.
                           type: string
                       required:
+                      - caBundle
                       - name
                       type: object
                     type: array

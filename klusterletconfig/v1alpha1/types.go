@@ -147,9 +147,14 @@ type KubeAPIServerConfig struct {
 	// +optional
 	URL string `json:"url,omitempty"`
 
-	// ServerVerificationStrategy is the strategy used for verifying the server certification
-	// +kubebuilder:default=default
-	// +kubebuilder:validation:Enum=UseSystemTruststore;UseAutoDetectedCABundle;UseCustomCABundles;Default
+	// ServerVerificationStrategy is the strategy used for verifying the server certification;
+	// The value could be "UseSystemTruststore", "UseAutoDetectedCABundle", "UseCustomCABundles", empty.
+	//
+	// When this strategy is not set or value is empty; if there is only one klusterletConfig configured for a cluster,
+	// the strategy is eaual to "UseAutoDetectedCABundle", if there are more than one klusterletConfigs, the empty
+	// strategy will be overrided by other non-empty strategies.
+	//
+	// +kubebuilder:validation:Enum=UseSystemTruststore;UseAutoDetectedCABundle;UseCustomCABundles
 	// +optional
 	ServerVerificationStrategy ServerVerificationStrategy `json:"serverVerificationStrategy,omitempty"`
 
@@ -177,16 +182,12 @@ type CABundle struct {
 	// +required
 	Name string `json:"name,omitempty"`
 
-	// CABundleData is base64 encoded certificate data
-	// +optional
-	CABundleData []byte `json:"caBundleData,omitempty"`
-
 	// CABundle refers to a ConfigMap with label "import.open-cluster-management.io/ca-bundle"
 	// containing the user-provided CA bundle
 	// The key of the CA data could be "ca-bundle.crt", "ca.crt", or "tls.crt".
-	// This field will be ignored if the CABundleData field is also present.
-	// +optional
-	CABundle *ConfigMapReference `json:"caBundle,omitempty"`
+	// +kubebuilder:validation:Required
+	// +required
+	CABundle ConfigMapReference `json:"caBundle,omitempty"`
 }
 
 // ServerVerificationStrategy represents the strategy used for the server certificate varification
@@ -204,11 +205,6 @@ const (
 	// ServerVerificationStrategyUseCustomCABundles is the strategy that uses CA certificates from a custom CA bundle
 	// to validate the server certificate.
 	ServerVerificationStrategyUseCustomCABundles ServerVerificationStrategy = "UseCustomCABundles"
-
-	// ServerVerificationStrategyDefault is the default strategy for server certificate verification; if there is only
-	// one klusterletConfig configured for a cluster, the strategy is eaual to "UseAutoDetectedCABundle", if there
-	// are more than one klusterletConfigs, this strategy will be overrided by other strategies.
-	ServerVerificationStrategyDefault ServerVerificationStrategy = "Default"
 )
 
 type ConfigMapReference struct {

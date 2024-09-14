@@ -12,10 +12,9 @@ package v1alpha1
 
 // AUTO-GENERATED FUNCTIONS START HERE
 var map_CABundle = map[string]string{
-	"":             "CABundle is a user-provided CA bundle",
-	"name":         "Name is the identifier used to reference the CA bundle; Do not use \"auto-detected\" as the name since it is the reserved name for the auto-detected CA bundle.",
-	"caBundleData": "CABundleData is base64 encoded certificate data",
-	"caBundle":     "CABundle refers to a ConfigMap with label \"import.open-cluster-management.io/ca-bundle\" containing the user-provided CA bundle The key of the CA data could be \"ca-bundle.crt\", \"ca.crt\", or \"tls.crt\". This field will be ignored if the CABundleData field is also present.",
+	"":         "CABundle is a user-provided CA bundle",
+	"name":     "Name is the identifier used to reference the CA bundle; Do not use \"auto-detected\" as the name since it is the reserved name for the auto-detected CA bundle.",
+	"caBundle": "CABundle refers to a ConfigMap with label \"import.open-cluster-management.io/ca-bundle\" containing the user-provided CA bundle The key of the CA data could be \"ca-bundle.crt\", \"ca.crt\", or \"tls.crt\".",
 }
 
 func (CABundle) SwaggerDoc() map[string]string {
@@ -87,7 +86,7 @@ func (KlusterletConfigStatus) SwaggerDoc() map[string]string {
 var map_KubeAPIServerConfig = map[string]string{
 	"":                           "KubeAPIServerConfig specifies the custom configuration for the Hub kube API server",
 	"url":                        "URL is the endpoint of the hub Kube API server. If not present, the .status.apiServerURL of Infrastructure/cluster will be used as the default value. e.g. `oc get infrastructure cluster -o jsonpath='{.status.apiServerURL}'`",
-	"serverVerificationStrategy": "ServerVerificationStrategy is the strategy used for verifying the server certification",
+	"serverVerificationStrategy": "ServerVerificationStrategy is the strategy used for verifying the server certification; The value could be \"UseSystemTruststore\", \"UseAutoDetectedCABundle\", \"UseCustomCABundles\", empty.\n\nWhen this strategy is not set or value is empty; if there is only one klusterletConfig configured for a cluster, the strategy is eaual to \"UseAutoDetectedCABundle\", if there are more than one klusterletConfigs, the empty strategy will be overrided by other non-empty strategies.",
 	"trustedCABundles":           "TrustedCABundles refers to a collection of user-provided CA bundles used for verifying the server certificate of the hub Kubernetes API If the ServerVerificationStrategy is set to \"UseSystemTruststore\", this field will be ignored. Otherwise, the CA certificates from the configured bundles will be appended to the klusterlet CA bundle.",
 	"proxyURL":                   "ProxyURL is the URL to the proxy to be used for all requests made by client If an HTTPS proxy server is configured, you may also need to add the necessary CA certificates to TrustedCABundles.",
 }

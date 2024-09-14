@@ -7,7 +7,8 @@ import (
 	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
 )
 
-var klusterletConfigMergeFuncs map[string]func(base, override interface{}) (interface{}, error) = map[string]func(base, override interface{}) (interface{}, error){
+var klusterletConfigMergeFuncs map[string]func(base, override interface{}) (interface{}, error) = map[string]func(
+	base, override interface{}) (interface{}, error){
 	"Registries":                             override,
 	"PullSecret":                             override,
 	"NodePlacement":                          override,
@@ -29,7 +30,8 @@ func override(base, toMerge interface{}) (interface{}, error) {
 }
 
 // MergeKlusterletConfigs merges multiple KlusterletConfigs into a single KlusterletConfig.
-func MergeKlusterletConfigs(klusterletconfigs ...*klusterletconfigv1alpha1.KlusterletConfig) (*klusterletconfigv1alpha1.KlusterletConfig, error) {
+func MergeKlusterletConfigs(klusterletconfigs ...*klusterletconfigv1alpha1.KlusterletConfig) (
+	*klusterletconfigv1alpha1.KlusterletConfig, error) {
 	// filter out the nil item in the list
 	var filtered []*klusterletconfigv1alpha1.KlusterletConfig
 	for _, kc := range klusterletconfigs {
@@ -109,7 +111,7 @@ func mergeHubKubeAPIServerConfig(base, toMerge interface{}) (interface{}, error)
 		config.ProxyURL = old.ProxyURL
 	}
 
-	if config.ServerVerificationStrategy == klusterletconfigv1alpha1.ServerVerificationStrategyDefault {
+	if len(config.ServerVerificationStrategy) == 0 {
 		config.ServerVerificationStrategy = old.ServerVerificationStrategy
 	}
 

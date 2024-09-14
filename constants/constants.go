@@ -28,6 +28,6 @@ const (
 	// by the ACM hub. Only one ManagedCluster and only the ACM hub cluster can have this label.
 	SelfManagedClusterLabelKey string = "local-cluster"
 
-	// HubKubeAPIServerCABunbleLabelKey is the label key on configmaps to store the customized kube-apiserver ca bundle.
-	HubKubeAPIServerCABunbleLabelKey string = "import.open-cluster-management.io/ca-bundle"
+	// HubCABundleLabelKey is the label key on configmaps to store the customized ca bundle.
+	HubCABundleLabelKey string = "import.open-cluster-management.io/ca-bundle"
 )
