@@ -189,3 +189,194 @@ func TestMergeKlusterletConfigs(test *testing.T) {
 		})
 	}
 }
+
+func TestMergeHubKubeAPIServerConfig(test *testing.T) {
+	testcases := []struct {
+		name     string
+		old      *klusterletconfigv1alpha1.KubeAPIServerConfig
+		new      *klusterletconfigv1alpha1.KubeAPIServerConfig
+		expected *klusterletconfigv1alpha1.KubeAPIServerConfig
+	}{
+		{
+			name: "old is nil",
+			old:  nil,
+			new: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+				URL:                        "http://apiserver.com",
+				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
+				},
+				ProxyURL: "http://proxy",
+			},
+			expected: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+				URL:                        "http://apiserver.com",
+				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
+				},
+				ProxyURL: "http://proxy",
+			},
+		},
+		{
+			name: "new is nil",
+			old: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+				URL:                        "http://apiserver.com",
+				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
+				},
+				ProxyURL: "http://proxy",
+			},
+			new: nil,
+			expected: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+				URL:                        "http://apiserver.com",
+				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
+				},
+				ProxyURL: "http://proxy",
+			},
+		},
+		{
+			name: "override all",
+			old: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+				URL:                        "http://apiserver.com",
+				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
+				},
+				ProxyURL: "http://proxy",
+			},
+			new: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+				URL:                        "http://new-apiserver.com",
+				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseSystemTruststore,
+				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
+					{
+						Name: "ca-bundle-new",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns2",
+							Name:      "n2",
+						},
+					},
+				},
+				ProxyURL: "http://proxy-new",
+			},
+			expected: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+				URL:                        "http://new-apiserver.com",
+				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseSystemTruststore,
+				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
+					{
+						Name: "ca-bundle-new",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns2",
+							Name:      "n2",
+						},
+					},
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
+				},
+				ProxyURL: "http://proxy-new",
+			},
+		},
+		{
+			name: "override all except ServerVerificationStrategy",
+			old: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+				URL:                        "http://apiserver.com",
+				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
+				},
+				ProxyURL: "http://proxy",
+			},
+			new: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+				URL:                        "http://new-apiserver.com",
+				ServerVerificationStrategy: "",
+				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
+					{
+						Name: "ca-bundle-new",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns2",
+							Name:      "n2",
+						},
+					},
+				},
+				ProxyURL: "http://proxy-new",
+			},
+			expected: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+				URL:                        "http://new-apiserver.com",
+				ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+				TrustedCABundles: []klusterletconfigv1alpha1.CABundle{
+					{
+						Name: "ca-bundle-new",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns2",
+							Name:      "n2",
+						},
+					},
+					{
+						Name: "ca-bundle",
+						CABundle: klusterletconfigv1alpha1.ConfigMapReference{
+							Namespace: "ns1",
+							Name:      "n1",
+						},
+					},
+				},
+				ProxyURL: "http://proxy-new",
+			},
+		},
+	}
+
+	for _, tc := range testcases {
+		test.Run(tc.name, func(test *testing.T) {
+			merged, err := mergeHubKubeAPIServerConfig(tc.old, tc.new)
+			if err != nil {
+				test.Fatalf("unexpected error: %v", err)
+			}
+
+			if !reflect.DeepEqual(merged, tc.expected) {
+				test.Errorf("expected: %v, got: %v", tc.expected, merged)
+			}
+		})
+	}
+}
