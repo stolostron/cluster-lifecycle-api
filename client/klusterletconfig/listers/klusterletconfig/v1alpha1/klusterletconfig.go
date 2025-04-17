@@ -3,10 +3,10 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // KlusterletConfigLister helps list KlusterletConfigs.
@@ -14,39 +14,19 @@ import (
 type KlusterletConfigLister interface {
 	// List lists all KlusterletConfigs in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.KlusterletConfig, err error)
+	List(selector labels.Selector) (ret []*klusterletconfigv1alpha1.KlusterletConfig, err error)
 	// Get retrieves the KlusterletConfig from the index for a given name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.KlusterletConfig, error)
+	Get(name string) (*klusterletconfigv1alpha1.KlusterletConfig, error)
 	KlusterletConfigListerExpansion
 }
 
 // klusterletConfigLister implements the KlusterletConfigLister interface.
 type klusterletConfigLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*klusterletconfigv1alpha1.KlusterletConfig]
 }
 
 // NewKlusterletConfigLister returns a new KlusterletConfigLister.
 func NewKlusterletConfigLister(indexer cache.Indexer) KlusterletConfigLister {
-	return &klusterletConfigLister{indexer: indexer}
-}
-
-// List lists all KlusterletConfigs in the indexer.
-func (s *klusterletConfigLister) List(selector labels.Selector) (ret []*v1alpha1.KlusterletConfig, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.KlusterletConfig))
-	})
-	return ret, err
-}
-
-// Get retrieves the KlusterletConfig from the index for a given name.
-func (s *klusterletConfigLister) Get(name string) (*v1alpha1.KlusterletConfig, error) {
-	obj, exists, err := s.indexer.GetByKey(name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("klusterletconfig"), name)
-	}
-	return obj.(*v1alpha1.KlusterletConfig), nil
+	return &klusterletConfigLister{listers.New[*klusterletconfigv1alpha1.KlusterletConfig](indexer, klusterletconfigv1alpha1.Resource("klusterletconfig"))}
 }

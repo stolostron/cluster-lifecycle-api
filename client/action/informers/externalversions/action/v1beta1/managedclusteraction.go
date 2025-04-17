@@ -3,13 +3,13 @@
 package v1beta1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
-	actionv1beta1 "github.com/stolostron/cluster-lifecycle-api/action/v1beta1"
+	clusterlifecycleapiactionv1beta1 "github.com/stolostron/cluster-lifecycle-api/action/v1beta1"
 	versioned "github.com/stolostron/cluster-lifecycle-api/client/action/clientset/versioned"
 	internalinterfaces "github.com/stolostron/cluster-lifecycle-api/client/action/informers/externalversions/internalinterfaces"
-	v1beta1 "github.com/stolostron/cluster-lifecycle-api/client/action/listers/action/v1beta1"
+	actionv1beta1 "github.com/stolostron/cluster-lifecycle-api/client/action/listers/action/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -20,7 +20,7 @@ import (
 // ManagedClusterActions.
 type ManagedClusterActionInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1beta1.ManagedClusterActionLister
+	Lister() actionv1beta1.ManagedClusterActionLister
 }
 
 type managedClusterActionInformer struct {
@@ -55,7 +55,7 @@ func NewFilteredManagedClusterActionInformer(client versioned.Interface, namespa
 				return client.ActionV1beta1().ManagedClusterActions(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&actionv1beta1.ManagedClusterAction{},
+		&clusterlifecycleapiactionv1beta1.ManagedClusterAction{},
 		resyncPeriod,
 		indexers,
 	)
@@ -66,9 +66,9 @@ func (f *managedClusterActionInformer) defaultInformer(client versioned.Interfac
 }
 
 func (f *managedClusterActionInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&actionv1beta1.ManagedClusterAction{}, f.defaultInformer)
+	return f.factory.InformerFor(&clusterlifecycleapiactionv1beta1.ManagedClusterAction{}, f.defaultInformer)
 }
 
-func (f *managedClusterActionInformer) Lister() v1beta1.ManagedClusterActionLister {
-	return v1beta1.NewManagedClusterActionLister(f.Informer().GetIndexer())
+func (f *managedClusterActionInformer) Lister() actionv1beta1.ManagedClusterActionLister {
+	return actionv1beta1.NewManagedClusterActionLister(f.Informer().GetIndexer())
 }

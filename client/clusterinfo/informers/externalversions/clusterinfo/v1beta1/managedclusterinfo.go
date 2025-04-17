@@ -3,13 +3,13 @@
 package v1beta1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
 	versioned "github.com/stolostron/cluster-lifecycle-api/client/clusterinfo/clientset/versioned"
 	internalinterfaces "github.com/stolostron/cluster-lifecycle-api/client/clusterinfo/informers/externalversions/internalinterfaces"
-	v1beta1 "github.com/stolostron/cluster-lifecycle-api/client/clusterinfo/listers/clusterinfo/v1beta1"
-	clusterinfov1beta1 "github.com/stolostron/cluster-lifecycle-api/clusterinfo/v1beta1"
+	clusterinfov1beta1 "github.com/stolostron/cluster-lifecycle-api/client/clusterinfo/listers/clusterinfo/v1beta1"
+	clusterlifecycleapiclusterinfov1beta1 "github.com/stolostron/cluster-lifecycle-api/clusterinfo/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -20,7 +20,7 @@ import (
 // ManagedClusterInfos.
 type ManagedClusterInfoInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1beta1.ManagedClusterInfoLister
+	Lister() clusterinfov1beta1.ManagedClusterInfoLister
 }
 
 type managedClusterInfoInformer struct {
@@ -55,7 +55,7 @@ func NewFilteredManagedClusterInfoInformer(client versioned.Interface, namespace
 				return client.InternalV1beta1().ManagedClusterInfos(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&clusterinfov1beta1.ManagedClusterInfo{},
+		&clusterlifecycleapiclusterinfov1beta1.ManagedClusterInfo{},
 		resyncPeriod,
 		indexers,
 	)
@@ -66,9 +66,9 @@ func (f *managedClusterInfoInformer) defaultInformer(client versioned.Interface,
 }
 
 func (f *managedClusterInfoInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&clusterinfov1beta1.ManagedClusterInfo{}, f.defaultInformer)
+	return f.factory.InformerFor(&clusterlifecycleapiclusterinfov1beta1.ManagedClusterInfo{}, f.defaultInformer)
 }
 
-func (f *managedClusterInfoInformer) Lister() v1beta1.ManagedClusterInfoLister {
-	return v1beta1.NewManagedClusterInfoLister(f.Informer().GetIndexer())
+func (f *managedClusterInfoInformer) Lister() clusterinfov1beta1.ManagedClusterInfoLister {
+	return clusterinfov1beta1.NewManagedClusterInfoLister(f.Informer().GetIndexer())
 }

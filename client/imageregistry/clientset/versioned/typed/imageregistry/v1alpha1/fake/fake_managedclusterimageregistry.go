@@ -3,123 +3,34 @@
 package fake
 
 import (
-	"context"
-
+	imageregistryv1alpha1 "github.com/stolostron/cluster-lifecycle-api/client/imageregistry/clientset/versioned/typed/imageregistry/v1alpha1"
 	v1alpha1 "github.com/stolostron/cluster-lifecycle-api/imageregistry/v1alpha1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeManagedClusterImageRegistries implements ManagedClusterImageRegistryInterface
-type FakeManagedClusterImageRegistries struct {
+// fakeManagedClusterImageRegistries implements ManagedClusterImageRegistryInterface
+type fakeManagedClusterImageRegistries struct {
+	*gentype.FakeClientWithList[*v1alpha1.ManagedClusterImageRegistry, *v1alpha1.ManagedClusterImageRegistryList]
 	Fake *FakeImageregistryV1alpha1
-	ns   string
 }
 
-var managedclusterimageregistriesResource = v1alpha1.SchemeGroupVersion.WithResource("managedclusterimageregistries")
-
-var managedclusterimageregistriesKind = v1alpha1.SchemeGroupVersion.WithKind("ManagedClusterImageRegistry")
-
-// Get takes name of the managedClusterImageRegistry, and returns the corresponding managedClusterImageRegistry object, and an error if there is any.
-func (c *FakeManagedClusterImageRegistries) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1alpha1.ManagedClusterImageRegistry, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(managedclusterimageregistriesResource, c.ns, name), &v1alpha1.ManagedClusterImageRegistry{})
-
-	if obj == nil {
-		return nil, err
+func newFakeManagedClusterImageRegistries(fake *FakeImageregistryV1alpha1, namespace string) imageregistryv1alpha1.ManagedClusterImageRegistryInterface {
+	return &fakeManagedClusterImageRegistries{
+		gentype.NewFakeClientWithList[*v1alpha1.ManagedClusterImageRegistry, *v1alpha1.ManagedClusterImageRegistryList](
+			fake.Fake,
+			namespace,
+			v1alpha1.SchemeGroupVersion.WithResource("managedclusterimageregistries"),
+			v1alpha1.SchemeGroupVersion.WithKind("ManagedClusterImageRegistry"),
+			func() *v1alpha1.ManagedClusterImageRegistry { return &v1alpha1.ManagedClusterImageRegistry{} },
+			func() *v1alpha1.ManagedClusterImageRegistryList { return &v1alpha1.ManagedClusterImageRegistryList{} },
+			func(dst, src *v1alpha1.ManagedClusterImageRegistryList) { dst.ListMeta = src.ListMeta },
+			func(list *v1alpha1.ManagedClusterImageRegistryList) []*v1alpha1.ManagedClusterImageRegistry {
+				return gentype.ToPointerSlice(list.Items)
+			},
+			func(list *v1alpha1.ManagedClusterImageRegistryList, items []*v1alpha1.ManagedClusterImageRegistry) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1alpha1.ManagedClusterImageRegistry), err
-}
-
-// List takes label and field selectors, and returns the list of ManagedClusterImageRegistries that match those selectors.
-func (c *FakeManagedClusterImageRegistries) List(ctx context.Context, opts v1.ListOptions) (result *v1alpha1.ManagedClusterImageRegistryList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(managedclusterimageregistriesResource, managedclusterimageregistriesKind, c.ns, opts), &v1alpha1.ManagedClusterImageRegistryList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1alpha1.ManagedClusterImageRegistryList{ListMeta: obj.(*v1alpha1.ManagedClusterImageRegistryList).ListMeta}
-	for _, item := range obj.(*v1alpha1.ManagedClusterImageRegistryList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested managedClusterImageRegistries.
-func (c *FakeManagedClusterImageRegistries) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(managedclusterimageregistriesResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a managedClusterImageRegistry and creates it.  Returns the server's representation of the managedClusterImageRegistry, and an error, if there is any.
-func (c *FakeManagedClusterImageRegistries) Create(ctx context.Context, managedClusterImageRegistry *v1alpha1.ManagedClusterImageRegistry, opts v1.CreateOptions) (result *v1alpha1.ManagedClusterImageRegistry, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(managedclusterimageregistriesResource, c.ns, managedClusterImageRegistry), &v1alpha1.ManagedClusterImageRegistry{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.ManagedClusterImageRegistry), err
-}
-
-// Update takes the representation of a managedClusterImageRegistry and updates it. Returns the server's representation of the managedClusterImageRegistry, and an error, if there is any.
-func (c *FakeManagedClusterImageRegistries) Update(ctx context.Context, managedClusterImageRegistry *v1alpha1.ManagedClusterImageRegistry, opts v1.UpdateOptions) (result *v1alpha1.ManagedClusterImageRegistry, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(managedclusterimageregistriesResource, c.ns, managedClusterImageRegistry), &v1alpha1.ManagedClusterImageRegistry{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.ManagedClusterImageRegistry), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeManagedClusterImageRegistries) UpdateStatus(ctx context.Context, managedClusterImageRegistry *v1alpha1.ManagedClusterImageRegistry, opts v1.UpdateOptions) (*v1alpha1.ManagedClusterImageRegistry, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(managedclusterimageregistriesResource, "status", c.ns, managedClusterImageRegistry), &v1alpha1.ManagedClusterImageRegistry{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.ManagedClusterImageRegistry), err
-}
-
-// Delete takes name of the managedClusterImageRegistry and deletes it. Returns an error if one occurs.
-func (c *FakeManagedClusterImageRegistries) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(managedclusterimageregistriesResource, c.ns, name, opts), &v1alpha1.ManagedClusterImageRegistry{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeManagedClusterImageRegistries) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(managedclusterimageregistriesResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1alpha1.ManagedClusterImageRegistryList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched managedClusterImageRegistry.
-func (c *FakeManagedClusterImageRegistries) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1alpha1.ManagedClusterImageRegistry, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(managedclusterimageregistriesResource, c.ns, name, pt, data, subresources...), &v1alpha1.ManagedClusterImageRegistry{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1alpha1.ManagedClusterImageRegistry), err
 }

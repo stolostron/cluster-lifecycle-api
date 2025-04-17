@@ -3,8 +3,8 @@
 package versioned
 
 import (
-	"fmt"
-	"net/http"
+	fmt "fmt"
+	http "net/http"
 
 	internalv1beta1 "github.com/stolostron/cluster-lifecycle-api/client/clusterinfo/clientset/versioned/typed/clusterinfo/v1beta1"
 	discovery "k8s.io/client-go/discovery"

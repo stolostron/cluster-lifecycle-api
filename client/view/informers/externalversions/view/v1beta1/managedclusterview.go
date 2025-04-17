@@ -3,13 +3,13 @@
 package v1beta1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
 	versioned "github.com/stolostron/cluster-lifecycle-api/client/view/clientset/versioned"
 	internalinterfaces "github.com/stolostron/cluster-lifecycle-api/client/view/informers/externalversions/internalinterfaces"
-	v1beta1 "github.com/stolostron/cluster-lifecycle-api/client/view/listers/view/v1beta1"
-	viewv1beta1 "github.com/stolostron/cluster-lifecycle-api/view/v1beta1"
+	viewv1beta1 "github.com/stolostron/cluster-lifecycle-api/client/view/listers/view/v1beta1"
+	clusterlifecycleapiviewv1beta1 "github.com/stolostron/cluster-lifecycle-api/view/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -20,7 +20,7 @@ import (
 // ManagedClusterViews.
 type ManagedClusterViewInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1beta1.ManagedClusterViewLister
+	Lister() viewv1beta1.ManagedClusterViewLister
 }
 
 type managedClusterViewInformer struct {
@@ -55,7 +55,7 @@ func NewFilteredManagedClusterViewInformer(client versioned.Interface, namespace
 				return client.ViewV1beta1().ManagedClusterViews(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&viewv1beta1.ManagedClusterView{},
+		&clusterlifecycleapiviewv1beta1.ManagedClusterView{},
 		resyncPeriod,
 		indexers,
 	)
@@ -66,9 +66,9 @@ func (f *managedClusterViewInformer) defaultInformer(client versioned.Interface,
 }
 
 func (f *managedClusterViewInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&viewv1beta1.ManagedClusterView{}, f.defaultInformer)
+	return f.factory.InformerFor(&clusterlifecycleapiviewv1beta1.ManagedClusterView{}, f.defaultInformer)
 }
 
-func (f *managedClusterViewInformer) Lister() v1beta1.ManagedClusterViewLister {
-	return v1beta1.NewManagedClusterViewLister(f.Informer().GetIndexer())
+func (f *managedClusterViewInformer) Lister() viewv1beta1.ManagedClusterViewLister {
+	return viewv1beta1.NewManagedClusterViewLister(f.Informer().GetIndexer())
 }

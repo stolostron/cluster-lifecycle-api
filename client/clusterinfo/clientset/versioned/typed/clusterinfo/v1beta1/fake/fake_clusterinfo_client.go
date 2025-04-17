@@ -13,7 +13,7 @@ type FakeInternalV1beta1 struct {
 }
 
 func (c *FakeInternalV1beta1) ManagedClusterInfos(namespace string) v1beta1.ManagedClusterInfoInterface {
-	return &FakeManagedClusterInfos{c, namespace}
+	return newFakeManagedClusterInfos(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

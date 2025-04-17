@@ -3,10 +3,10 @@
 package v1beta1
 
 import (
-	"net/http"
+	http "net/http"
 
-	"github.com/stolostron/cluster-lifecycle-api/client/clusterinfo/clientset/versioned/scheme"
-	v1beta1 "github.com/stolostron/cluster-lifecycle-api/clusterinfo/v1beta1"
+	scheme "github.com/stolostron/cluster-lifecycle-api/client/clusterinfo/clientset/versioned/scheme"
+	clusterinfov1beta1 "github.com/stolostron/cluster-lifecycle-api/clusterinfo/v1beta1"
 	rest "k8s.io/client-go/rest"
 )
 
@@ -69,10 +69,10 @@ func New(c rest.Interface) *InternalV1beta1Client {
 }
 
 func setConfigDefaults(config *rest.Config) error {
-	gv := v1beta1.SchemeGroupVersion
+	gv := clusterinfov1beta1.SchemeGroupVersion
 	config.GroupVersion = &gv
 	config.APIPath = "/apis"
-	config.NegotiatedSerializer = scheme.Codecs.WithoutConversion()
+	config.NegotiatedSerializer = rest.CodecFactoryForGeneratedClient(scheme.Scheme, scheme.Codecs).WithoutConversion()
 
 	if config.UserAgent == "" {
 		config.UserAgent = rest.DefaultKubernetesUserAgent()

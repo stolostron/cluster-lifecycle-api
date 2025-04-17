@@ -3,7 +3,7 @@
 package externalversions
 
 import (
-	"fmt"
+	fmt "fmt"
 
 	v1beta1 "github.com/stolostron/cluster-lifecycle-api/view/v1beta1"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"

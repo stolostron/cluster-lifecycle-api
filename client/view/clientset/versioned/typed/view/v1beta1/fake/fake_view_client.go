@@ -13,7 +13,7 @@ type FakeViewV1beta1 struct {
 }
 
 func (c *FakeViewV1beta1) ManagedClusterViews(namespace string) v1beta1.ManagedClusterViewInterface {
-	return &FakeManagedClusterViews{c, namespace}
+	return newFakeManagedClusterViews(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate
