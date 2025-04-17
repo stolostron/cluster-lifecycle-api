@@ -2,6 +2,8 @@ package klusterletconfig
 
 import (
 	"fmt"
+	"k8s.io/apimachinery/pkg/util/sets"
+	operatorv1 "open-cluster-management.io/api/operator/v1"
 	"reflect"
 
 	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
@@ -19,6 +21,7 @@ var klusterletConfigMergeFuncs map[string]func(base, override interface{}) (inte
 	"InstallMode":                            override,
 	"BootstrapKubeConfigs":                   override,
 	"HubKubeAPIServerConfig":                 mergeHubKubeAPIServerConfig,
+	"FeatureGates":                           mergeFeatureGates,
 }
 
 func override(base, toMerge interface{}) (interface{}, error) {
@@ -122,6 +125,29 @@ func mergeHubKubeAPIServerConfig(base, toMerge interface{}) (interface{}, error)
 	}
 
 	return config, nil
+}
+
+func mergeFeatureGates(base, toMerge interface{}) (interface{}, error) {
+	old, ok := base.([]operatorv1.FeatureGate)
+	if !ok {
+		return nil, fmt.Errorf("base is not of type FeatureGate")
+	}
+	new, ok := toMerge.([]operatorv1.FeatureGate)
+	if !ok {
+		return nil, fmt.Errorf("toMerge is not of type FeatureGate")
+	}
+
+	newMap := sets.New[string]()
+	for _, f := range new {
+		newMap.Insert(f.Feature)
+	}
+
+	for _, f := range old {
+		if !newMap.Has(f.Feature) {
+			new = append(new, f)
+		}
+	}
+	return new, nil
 }
 
 func containsCA(bundles []klusterletconfigv1alpha1.CABundle, bundle klusterletconfigv1alpha1.CABundle) bool {
