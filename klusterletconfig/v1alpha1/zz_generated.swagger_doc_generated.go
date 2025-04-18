@@ -69,6 +69,7 @@ var map_KlusterletConfigSpec = map[string]string{
 	"appliedManifestWorkEvictionGracePeriod": "AppliedManifestWorkEvictionGracePeriod is the eviction grace period the work agent will wait before evicting the AppliedManifestWorks, whose corresponding ManifestWorks are missing on the hub cluster, from the managed cluster. If not present, the default value of the work agent will be used. If its value is set to \"INFINITE\", it means the AppliedManifestWorks will never been evicted from the managed cluster.",
 	"installMode":                            "InstallMode is the mode to install the klusterlet",
 	"bootstrapKubeConfigs":                   "BootstrapKubeConfigSecrets is the list of secrets that reflects the Klusterlet.Spec.RegistrationConfiguration.BootstrapKubeConfigs.",
+	"featureGates":                           "FeatureGates is the list of feature gate for the klusterlet agent. If it is set empty, default feature gates will be used.",
 }
 
 func (KlusterletConfigSpec) SwaggerDoc() map[string]string {

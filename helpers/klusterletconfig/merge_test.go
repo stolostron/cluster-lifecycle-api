@@ -190,6 +190,113 @@ func TestMergeKlusterletConfigs(test *testing.T) {
 	}
 }
 
+func TestMergeFeatureGates(t *testing.T) {
+	testcases := []struct {
+		name   string
+		old    *klusterletconfigv1alpha1.KlusterletConfig
+		new    *klusterletconfigv1alpha1.KlusterletConfig
+		expect []operatorv1.FeatureGate
+	}{
+		{
+			name: "empty new",
+			old: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					FeatureGates: []operatorv1.FeatureGate{
+						{
+							Feature: "feature1",
+							Mode:    operatorv1.FeatureGateModeTypeEnable,
+						},
+					},
+				},
+			},
+			new: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					FeatureGates: []operatorv1.FeatureGate{},
+				},
+			},
+			expect: []operatorv1.FeatureGate{
+				{
+					Feature: "feature1",
+					Mode:    operatorv1.FeatureGateModeTypeEnable,
+				},
+			},
+		},
+		{
+			name: "empty old",
+			old: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					FeatureGates: []operatorv1.FeatureGate{},
+				},
+			},
+			new: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					FeatureGates: []operatorv1.FeatureGate{
+						{
+							Feature: "feature2",
+							Mode:    operatorv1.FeatureGateModeTypeEnable,
+						},
+					},
+				},
+			},
+			expect: []operatorv1.FeatureGate{
+				{
+					Feature: "feature2",
+					Mode:    operatorv1.FeatureGateModeTypeEnable,
+				},
+			},
+		},
+		{
+			name: "merge the two",
+			old: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					FeatureGates: []operatorv1.FeatureGate{
+						{
+							Feature: "feature1",
+							Mode:    operatorv1.FeatureGateModeTypeEnable,
+						},
+						{
+							Feature: "feature2",
+							Mode:    operatorv1.FeatureGateModeTypeEnable,
+						},
+					},
+				},
+			},
+			new: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					FeatureGates: []operatorv1.FeatureGate{
+						{
+							Feature: "feature2",
+							Mode:    operatorv1.FeatureGateModeTypeDisable,
+						},
+					},
+				},
+			},
+			expect: []operatorv1.FeatureGate{
+				{
+					Feature: "feature2",
+					Mode:    operatorv1.FeatureGateModeTypeDisable,
+				},
+				{
+					Feature: "feature1",
+					Mode:    operatorv1.FeatureGateModeTypeEnable,
+				},
+			},
+		},
+	}
+
+	for _, testcase := range testcases {
+		t.Run(testcase.name, func(t *testing.T) {
+			merged, err := mergeFeatureGates(testcase.old.Spec.FeatureGates, testcase.new.Spec.FeatureGates)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(merged, testcase.expect) {
+				t.Errorf("expected: %v, got: %v", testcase.expect, merged)
+			}
+		})
+	}
+}
+
 func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 	testcases := []struct {
 		name     string

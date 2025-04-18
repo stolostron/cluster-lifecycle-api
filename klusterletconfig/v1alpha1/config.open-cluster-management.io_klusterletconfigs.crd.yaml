@@ -96,6 +96,28 @@ spec:
                 required:
                 - type
                 type: object
+              featureGates:
+                description: FeatureGates is the list of feature gate for the klusterlet
+                  agent. If it is set empty, default feature gates will be used.
+                items:
+                  properties:
+                    feature:
+                      description: Feature is the key of feature gate. e.g. featuregate/Foo.
+                      type: string
+                    mode:
+                      default: Disable
+                      description: Mode is either Enable, Disable, "" where "" is
+                        Disable by default. In Enable mode, a valid feature gate `featuregate/Foo`
+                        will be set to "--featuregate/Foo=true". In Disable mode,
+                        a valid feature gate `featuregate/Foo` will be set to "--featuregate/Foo=false".
+                      enum:
+                      - Enable
+                      - Disable
+                      type: string
+                  required:
+                  - feature
+                  type: object
+                type: array
               hubKubeAPIServerCABundle:
                 description: |-
                   HubKubeAPIServerCABundle is the CA bundle to verify the server certificate of the hub kube API

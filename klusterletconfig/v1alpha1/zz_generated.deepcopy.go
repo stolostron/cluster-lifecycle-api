@@ -156,6 +156,11 @@ func (in *KlusterletConfigSpec) DeepCopyInto(out *KlusterletConfigSpec) {
 		(*in).DeepCopyInto(*out)
 	}
 	in.BootstrapKubeConfigs.DeepCopyInto(&out.BootstrapKubeConfigs)
+	if in.FeatureGates != nil {
+		in, out := &in.FeatureGates, &out.FeatureGates
+		*out = make([]v1.FeatureGate, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

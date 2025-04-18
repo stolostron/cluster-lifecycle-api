@@ -91,6 +91,10 @@ type KlusterletConfigSpec struct {
 	// BootstrapKubeConfigSecrets is the list of secrets that reflects the
 	// Klusterlet.Spec.RegistrationConfiguration.BootstrapKubeConfigs.
 	BootstrapKubeConfigs operatorv1.BootstrapKubeConfigs `json:"bootstrapKubeConfigs,omitempty"`
+
+	// FeatureGates is the list of feature gate for the klusterlet agent.
+	// If it is set empty, default feature gates will be used.
+	FeatureGates []operatorv1.FeatureGate `json:"featureGates,omitempty"`
 }
 
 // KlusterletConfigStatus defines the observed state of KlusterletConfig.
