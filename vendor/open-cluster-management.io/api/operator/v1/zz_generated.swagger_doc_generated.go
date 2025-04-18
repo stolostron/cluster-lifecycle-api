@@ -19,6 +19,24 @@ func (AddOnManagerConfiguration) SwaggerDoc() map[string]string {
 	return map_AddOnManagerConfiguration
 }
 
+var map_AwsIrsaConfig = map[string]string{
+	"hubClusterArn":          "This represents the hub cluster ARN Example - arn:eks:us-west-2:12345678910:cluster/hub-cluster1",
+	"autoApprovedIdentities": "AutoApprovedIdentities represent a list of approved arn patterns",
+	"tags":                   "List of tags to be added to AWS resources created by hub while processing awsirsa registration request Example - \"product:v1:tenant:app-name=My-App\"",
+}
+
+func (AwsIrsaConfig) SwaggerDoc() map[string]string {
+	return map_AwsIrsaConfig
+}
+
+var map_CSRConfig = map[string]string{
+	"autoApprovedIdentities": "AutoApprovedIdentities represent a list of approved users",
+}
+
+func (CSRConfig) SwaggerDoc() map[string]string {
+	return map_CSRConfig
+}
+
 var map_ClusterManager = map[string]string{
 	"":       "ClusterManager configures the controllers on the hub that govern registration and work distribution for attached Klusterlets. In Default mode, ClusterManager will only be deployed in open-cluster-management-hub namespace. In Hosted mode, ClusterManager will be deployed in the namespace with the same name as cluster manager.",
 	"spec":   "Spec represents a desired deployment configuration of controllers that govern registration and work distribution for attached Klusterlets.",
@@ -122,9 +140,20 @@ func (NodePlacement) SwaggerDoc() map[string]string {
 	return map_NodePlacement
 }
 
+var map_RegistrationDriverHub = map[string]string{
+	"authType": "Type of the authentication used by hub to initialize the Hub cluster. Possible values are csr and awsirsa.",
+	"csr":      "CSR represents the configuration for csr driver.",
+	"awsirsa":  "AwsIrsa represents the configuration for awsirsa driver.",
+}
+
+func (RegistrationDriverHub) SwaggerDoc() map[string]string {
+	return map_RegistrationDriverHub
+}
+
 var map_RegistrationHubConfiguration = map[string]string{
-	"autoApproveUsers": "AutoApproveUser represents a list of users that can auto approve CSR and accept client. If the credential of the bootstrap-hub-kubeconfig matches to the users, the cluster created by the bootstrap-hub-kubeconfig will be auto-registered into the hub cluster. This takes effect only when ManagedClusterAutoApproval feature gate is enabled.",
-	"featureGates":     "FeatureGates represents the list of feature gates for registration If it is set empty, default feature gates will be used. If it is set, featuregate/Foo is an example of one item in FeatureGates:\n  1. If featuregate/Foo does not exist, registration-operator will discard it\n  2. If featuregate/Foo exists and is false by default. It is now possible to set featuregate/Foo=[false|true]\n  3. If featuregate/Foo exists and is true by default. If a cluster-admin upgrading from 1 to 2 wants to continue having featuregate/Foo=false,\n \the can set featuregate/Foo=false before upgrading. Let's say the cluster-admin wants featuregate/Foo=false.",
+	"autoApproveUsers":    "AutoApproveUser represents a list of users that can auto approve CSR and accept client. If the credential of the bootstrap-hub-kubeconfig matches to the users, the cluster created by the bootstrap-hub-kubeconfig will be auto-registered into the hub cluster. This takes effect only when ManagedClusterAutoApproval feature gate is enabled.",
+	"featureGates":        "FeatureGates represents the list of feature gates for registration If it is set empty, default feature gates will be used. If it is set, featuregate/Foo is an example of one item in FeatureGates:\n  1. If featuregate/Foo does not exist, registration-operator will discard it\n  2. If featuregate/Foo exists and is false by default. It is now possible to set featuregate/Foo=[false|true]\n  3. If featuregate/Foo exists and is true by default. If a cluster-admin upgrading from 1 to 2 wants to continue having featuregate/Foo=false,\n \the can set featuregate/Foo=false before upgrading. Let's say the cluster-admin wants featuregate/Foo=false.",
+	"registrationDrivers": "RegistrationDrivers represent the list of hub registration drivers that contain information used by hub to initialize the hub cluster A RegistrationDriverHub contains details of authentication type and the hub cluster ARN",
 }
 
 func (RegistrationHubConfiguration) SwaggerDoc() map[string]string {
@@ -161,6 +190,15 @@ var map_WorkConfiguration = map[string]string{
 
 func (WorkConfiguration) SwaggerDoc() map[string]string {
 	return map_WorkConfiguration
+}
+
+var map_AwsIrsa = map[string]string{
+	"hubClusterArn":     "The arn of the hub cluster (ie: an EKS cluster). This will be required to pass information to hub, which hub will use to create IAM identities for this klusterlet. Example - arn:eks:us-west-2:12345678910:cluster/hub-cluster1.",
+	"managedClusterArn": "The arn of the managed cluster (ie: an EKS cluster). This will be required to generate the md5hash which will be used as a suffix to create IAM role on hub as well as used by kluslerlet-agent, to assume role suffixed with the md5hash, on startup. Example - arn:eks:us-west-2:12345678910:cluster/managed-cluster1.",
+}
+
+func (AwsIrsa) SwaggerDoc() map[string]string {
+	return map_AwsIrsa
 }
 
 var map_BootstrapKubeConfigs = map[string]string{
@@ -268,10 +306,20 @@ var map_RegistrationConfiguration = map[string]string{
 	"kubeAPIQPS":                  "KubeAPIQPS indicates the maximum QPS while talking with apiserver of hub cluster from the spoke cluster. If it is set empty, use the default value: 50",
 	"kubeAPIBurst":                "KubeAPIBurst indicates the maximum burst of the throttle while talking with apiserver of hub cluster from the spoke cluster. If it is set empty, use the default value: 100",
 	"bootstrapKubeConfigs":        "BootstrapKubeConfigs defines the ordered list of bootstrap kubeconfigs. The order decides which bootstrap kubeconfig to use first when rebootstrap.\n\nWhen the agent loses the connection to the current hub over HubConnectionTimeoutSeconds, or the managedcluster CR is set `hubAcceptsClient=false` on the hub, the controller marks the related bootstrap kubeconfig as \"failed\".\n\nA failed bootstrapkubeconfig won't be used for the duration specified by SkipFailedBootstrapKubeConfigSeconds. But if the user updates the content of a failed bootstrapkubeconfig, the \"failed\" mark will be cleared.",
+	"registrationDriver":          "This provides driver details required to register with hub",
 }
 
 func (RegistrationConfiguration) SwaggerDoc() map[string]string {
 	return map_RegistrationConfiguration
+}
+
+var map_RegistrationDriver = map[string]string{
+	"authType": "Type of the authentication used by managedcluster to register as well as pull work from hub. Possible values are csr and awsirsa.",
+	"awsIrsa":  "Contain the details required for registering with hub cluster (ie: an EKS cluster) using AWS IAM roles for service account. This is required only when the authType is awsirsa.",
+}
+
+func (RegistrationDriver) SwaggerDoc() map[string]string {
+	return map_RegistrationDriver
 }
 
 var map_ServerURL = map[string]string{

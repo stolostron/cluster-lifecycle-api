@@ -3,13 +3,13 @@
 package v1alpha1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
 	versioned "github.com/stolostron/cluster-lifecycle-api/client/imageregistry/clientset/versioned"
 	internalinterfaces "github.com/stolostron/cluster-lifecycle-api/client/imageregistry/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/stolostron/cluster-lifecycle-api/client/imageregistry/listers/imageregistry/v1alpha1"
-	imageregistryv1alpha1 "github.com/stolostron/cluster-lifecycle-api/imageregistry/v1alpha1"
+	imageregistryv1alpha1 "github.com/stolostron/cluster-lifecycle-api/client/imageregistry/listers/imageregistry/v1alpha1"
+	clusterlifecycleapiimageregistryv1alpha1 "github.com/stolostron/cluster-lifecycle-api/imageregistry/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -20,7 +20,7 @@ import (
 // ManagedClusterImageRegistries.
 type ManagedClusterImageRegistryInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.ManagedClusterImageRegistryLister
+	Lister() imageregistryv1alpha1.ManagedClusterImageRegistryLister
 }
 
 type managedClusterImageRegistryInformer struct {
@@ -55,7 +55,7 @@ func NewFilteredManagedClusterImageRegistryInformer(client versioned.Interface, 
 				return client.ImageregistryV1alpha1().ManagedClusterImageRegistries(namespace).Watch(context.TODO(), options)
 			},
 		},
-		&imageregistryv1alpha1.ManagedClusterImageRegistry{},
+		&clusterlifecycleapiimageregistryv1alpha1.ManagedClusterImageRegistry{},
 		resyncPeriod,
 		indexers,
 	)
@@ -66,9 +66,9 @@ func (f *managedClusterImageRegistryInformer) defaultInformer(client versioned.I
 }
 
 func (f *managedClusterImageRegistryInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&imageregistryv1alpha1.ManagedClusterImageRegistry{}, f.defaultInformer)
+	return f.factory.InformerFor(&clusterlifecycleapiimageregistryv1alpha1.ManagedClusterImageRegistry{}, f.defaultInformer)
 }
 
-func (f *managedClusterImageRegistryInformer) Lister() v1alpha1.ManagedClusterImageRegistryLister {
-	return v1alpha1.NewManagedClusterImageRegistryLister(f.Informer().GetIndexer())
+func (f *managedClusterImageRegistryInformer) Lister() imageregistryv1alpha1.ManagedClusterImageRegistryLister {
+	return imageregistryv1alpha1.NewManagedClusterImageRegistryLister(f.Informer().GetIndexer())
 }

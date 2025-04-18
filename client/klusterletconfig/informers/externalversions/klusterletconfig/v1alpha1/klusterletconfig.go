@@ -3,13 +3,13 @@
 package v1alpha1
 
 import (
-	"context"
+	context "context"
 	time "time"
 
 	versioned "github.com/stolostron/cluster-lifecycle-api/client/klusterletconfig/clientset/versioned"
 	internalinterfaces "github.com/stolostron/cluster-lifecycle-api/client/klusterletconfig/informers/externalversions/internalinterfaces"
-	v1alpha1 "github.com/stolostron/cluster-lifecycle-api/client/klusterletconfig/listers/klusterletconfig/v1alpha1"
-	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
+	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/client/klusterletconfig/listers/klusterletconfig/v1alpha1"
+	clusterlifecycleapiklusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	watch "k8s.io/apimachinery/pkg/watch"
@@ -20,7 +20,7 @@ import (
 // KlusterletConfigs.
 type KlusterletConfigInformer interface {
 	Informer() cache.SharedIndexInformer
-	Lister() v1alpha1.KlusterletConfigLister
+	Lister() klusterletconfigv1alpha1.KlusterletConfigLister
 }
 
 type klusterletConfigInformer struct {
@@ -54,7 +54,7 @@ func NewFilteredKlusterletConfigInformer(client versioned.Interface, resyncPerio
 				return client.ConfigV1alpha1().KlusterletConfigs().Watch(context.TODO(), options)
 			},
 		},
-		&klusterletconfigv1alpha1.KlusterletConfig{},
+		&clusterlifecycleapiklusterletconfigv1alpha1.KlusterletConfig{},
 		resyncPeriod,
 		indexers,
 	)
@@ -65,9 +65,9 @@ func (f *klusterletConfigInformer) defaultInformer(client versioned.Interface, r
 }
 
 func (f *klusterletConfigInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&klusterletconfigv1alpha1.KlusterletConfig{}, f.defaultInformer)
+	return f.factory.InformerFor(&clusterlifecycleapiklusterletconfigv1alpha1.KlusterletConfig{}, f.defaultInformer)
 }
 
-func (f *klusterletConfigInformer) Lister() v1alpha1.KlusterletConfigLister {
-	return v1alpha1.NewKlusterletConfigLister(f.Informer().GetIndexer())
+func (f *klusterletConfigInformer) Lister() klusterletconfigv1alpha1.KlusterletConfigLister {
+	return klusterletconfigv1alpha1.NewKlusterletConfigLister(f.Informer().GetIndexer())
 }

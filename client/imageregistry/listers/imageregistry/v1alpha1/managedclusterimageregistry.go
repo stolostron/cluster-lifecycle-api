@@ -3,10 +3,10 @@
 package v1alpha1
 
 import (
-	v1alpha1 "github.com/stolostron/cluster-lifecycle-api/imageregistry/v1alpha1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	imageregistryv1alpha1 "github.com/stolostron/cluster-lifecycle-api/imageregistry/v1alpha1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // ManagedClusterImageRegistryLister helps list ManagedClusterImageRegistries.
@@ -14,7 +14,7 @@ import (
 type ManagedClusterImageRegistryLister interface {
 	// List lists all ManagedClusterImageRegistries in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.ManagedClusterImageRegistry, err error)
+	List(selector labels.Selector) (ret []*imageregistryv1alpha1.ManagedClusterImageRegistry, err error)
 	// ManagedClusterImageRegistries returns an object that can list and get ManagedClusterImageRegistries.
 	ManagedClusterImageRegistries(namespace string) ManagedClusterImageRegistryNamespaceLister
 	ManagedClusterImageRegistryListerExpansion
@@ -22,25 +22,17 @@ type ManagedClusterImageRegistryLister interface {
 
 // managedClusterImageRegistryLister implements the ManagedClusterImageRegistryLister interface.
 type managedClusterImageRegistryLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*imageregistryv1alpha1.ManagedClusterImageRegistry]
 }
 
 // NewManagedClusterImageRegistryLister returns a new ManagedClusterImageRegistryLister.
 func NewManagedClusterImageRegistryLister(indexer cache.Indexer) ManagedClusterImageRegistryLister {
-	return &managedClusterImageRegistryLister{indexer: indexer}
-}
-
-// List lists all ManagedClusterImageRegistries in the indexer.
-func (s *managedClusterImageRegistryLister) List(selector labels.Selector) (ret []*v1alpha1.ManagedClusterImageRegistry, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.ManagedClusterImageRegistry))
-	})
-	return ret, err
+	return &managedClusterImageRegistryLister{listers.New[*imageregistryv1alpha1.ManagedClusterImageRegistry](indexer, imageregistryv1alpha1.Resource("managedclusterimageregistry"))}
 }
 
 // ManagedClusterImageRegistries returns an object that can list and get ManagedClusterImageRegistries.
 func (s *managedClusterImageRegistryLister) ManagedClusterImageRegistries(namespace string) ManagedClusterImageRegistryNamespaceLister {
-	return managedClusterImageRegistryNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return managedClusterImageRegistryNamespaceLister{listers.NewNamespaced[*imageregistryv1alpha1.ManagedClusterImageRegistry](s.ResourceIndexer, namespace)}
 }
 
 // ManagedClusterImageRegistryNamespaceLister helps list and get ManagedClusterImageRegistries.
@@ -48,36 +40,15 @@ func (s *managedClusterImageRegistryLister) ManagedClusterImageRegistries(namesp
 type ManagedClusterImageRegistryNamespaceLister interface {
 	// List lists all ManagedClusterImageRegistries in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1alpha1.ManagedClusterImageRegistry, err error)
+	List(selector labels.Selector) (ret []*imageregistryv1alpha1.ManagedClusterImageRegistry, err error)
 	// Get retrieves the ManagedClusterImageRegistry from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1alpha1.ManagedClusterImageRegistry, error)
+	Get(name string) (*imageregistryv1alpha1.ManagedClusterImageRegistry, error)
 	ManagedClusterImageRegistryNamespaceListerExpansion
 }
 
 // managedClusterImageRegistryNamespaceLister implements the ManagedClusterImageRegistryNamespaceLister
 // interface.
 type managedClusterImageRegistryNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all ManagedClusterImageRegistries in the indexer for a given namespace.
-func (s managedClusterImageRegistryNamespaceLister) List(selector labels.Selector) (ret []*v1alpha1.ManagedClusterImageRegistry, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1alpha1.ManagedClusterImageRegistry))
-	})
-	return ret, err
-}
-
-// Get retrieves the ManagedClusterImageRegistry from the indexer for a given namespace and name.
-func (s managedClusterImageRegistryNamespaceLister) Get(name string) (*v1alpha1.ManagedClusterImageRegistry, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1alpha1.Resource("managedclusterimageregistry"), name)
-	}
-	return obj.(*v1alpha1.ManagedClusterImageRegistry), nil
+	listers.ResourceIndexer[*imageregistryv1alpha1.ManagedClusterImageRegistry]
 }

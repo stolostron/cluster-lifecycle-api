@@ -3,8 +3,8 @@
 package versioned
 
 import (
-	"fmt"
-	"net/http"
+	fmt "fmt"
+	http "net/http"
 
 	imageregistryv1alpha1 "github.com/stolostron/cluster-lifecycle-api/client/imageregistry/clientset/versioned/typed/imageregistry/v1alpha1"
 	discovery "k8s.io/client-go/discovery"

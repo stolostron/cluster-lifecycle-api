@@ -13,7 +13,7 @@ type FakeConfigV1alpha1 struct {
 }
 
 func (c *FakeConfigV1alpha1) KlusterletConfigs() v1alpha1.KlusterletConfigInterface {
-	return &FakeKlusterletConfigs{c}
+	return newFakeKlusterletConfigs(c)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

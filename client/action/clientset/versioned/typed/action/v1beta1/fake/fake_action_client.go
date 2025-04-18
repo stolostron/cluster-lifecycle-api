@@ -13,7 +13,7 @@ type FakeActionV1beta1 struct {
 }
 
 func (c *FakeActionV1beta1) ManagedClusterActions(namespace string) v1beta1.ManagedClusterActionInterface {
-	return &FakeManagedClusterActions{c, namespace}
+	return newFakeManagedClusterActions(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

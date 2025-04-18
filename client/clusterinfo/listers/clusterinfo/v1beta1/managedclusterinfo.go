@@ -3,10 +3,10 @@
 package v1beta1
 
 import (
-	v1beta1 "github.com/stolostron/cluster-lifecycle-api/clusterinfo/v1beta1"
-	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/labels"
-	"k8s.io/client-go/tools/cache"
+	clusterinfov1beta1 "github.com/stolostron/cluster-lifecycle-api/clusterinfo/v1beta1"
+	labels "k8s.io/apimachinery/pkg/labels"
+	listers "k8s.io/client-go/listers"
+	cache "k8s.io/client-go/tools/cache"
 )
 
 // ManagedClusterInfoLister helps list ManagedClusterInfos.
@@ -14,7 +14,7 @@ import (
 type ManagedClusterInfoLister interface {
 	// List lists all ManagedClusterInfos in the indexer.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1beta1.ManagedClusterInfo, err error)
+	List(selector labels.Selector) (ret []*clusterinfov1beta1.ManagedClusterInfo, err error)
 	// ManagedClusterInfos returns an object that can list and get ManagedClusterInfos.
 	ManagedClusterInfos(namespace string) ManagedClusterInfoNamespaceLister
 	ManagedClusterInfoListerExpansion
@@ -22,25 +22,17 @@ type ManagedClusterInfoLister interface {
 
 // managedClusterInfoLister implements the ManagedClusterInfoLister interface.
 type managedClusterInfoLister struct {
-	indexer cache.Indexer
+	listers.ResourceIndexer[*clusterinfov1beta1.ManagedClusterInfo]
 }
 
 // NewManagedClusterInfoLister returns a new ManagedClusterInfoLister.
 func NewManagedClusterInfoLister(indexer cache.Indexer) ManagedClusterInfoLister {
-	return &managedClusterInfoLister{indexer: indexer}
-}
-
-// List lists all ManagedClusterInfos in the indexer.
-func (s *managedClusterInfoLister) List(selector labels.Selector) (ret []*v1beta1.ManagedClusterInfo, err error) {
-	err = cache.ListAll(s.indexer, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1beta1.ManagedClusterInfo))
-	})
-	return ret, err
+	return &managedClusterInfoLister{listers.New[*clusterinfov1beta1.ManagedClusterInfo](indexer, clusterinfov1beta1.Resource("managedclusterinfo"))}
 }
 
 // ManagedClusterInfos returns an object that can list and get ManagedClusterInfos.
 func (s *managedClusterInfoLister) ManagedClusterInfos(namespace string) ManagedClusterInfoNamespaceLister {
-	return managedClusterInfoNamespaceLister{indexer: s.indexer, namespace: namespace}
+	return managedClusterInfoNamespaceLister{listers.NewNamespaced[*clusterinfov1beta1.ManagedClusterInfo](s.ResourceIndexer, namespace)}
 }
 
 // ManagedClusterInfoNamespaceLister helps list and get ManagedClusterInfos.
@@ -48,36 +40,15 @@ func (s *managedClusterInfoLister) ManagedClusterInfos(namespace string) Managed
 type ManagedClusterInfoNamespaceLister interface {
 	// List lists all ManagedClusterInfos in the indexer for a given namespace.
 	// Objects returned here must be treated as read-only.
-	List(selector labels.Selector) (ret []*v1beta1.ManagedClusterInfo, err error)
+	List(selector labels.Selector) (ret []*clusterinfov1beta1.ManagedClusterInfo, err error)
 	// Get retrieves the ManagedClusterInfo from the indexer for a given namespace and name.
 	// Objects returned here must be treated as read-only.
-	Get(name string) (*v1beta1.ManagedClusterInfo, error)
+	Get(name string) (*clusterinfov1beta1.ManagedClusterInfo, error)
 	ManagedClusterInfoNamespaceListerExpansion
 }
 
 // managedClusterInfoNamespaceLister implements the ManagedClusterInfoNamespaceLister
 // interface.
 type managedClusterInfoNamespaceLister struct {
-	indexer   cache.Indexer
-	namespace string
-}
-
-// List lists all ManagedClusterInfos in the indexer for a given namespace.
-func (s managedClusterInfoNamespaceLister) List(selector labels.Selector) (ret []*v1beta1.ManagedClusterInfo, err error) {
-	err = cache.ListAllByNamespace(s.indexer, s.namespace, selector, func(m interface{}) {
-		ret = append(ret, m.(*v1beta1.ManagedClusterInfo))
-	})
-	return ret, err
-}
-
-// Get retrieves the ManagedClusterInfo from the indexer for a given namespace and name.
-func (s managedClusterInfoNamespaceLister) Get(name string) (*v1beta1.ManagedClusterInfo, error) {
-	obj, exists, err := s.indexer.GetByKey(s.namespace + "/" + name)
-	if err != nil {
-		return nil, err
-	}
-	if !exists {
-		return nil, errors.NewNotFound(v1beta1.Resource("managedclusterinfo"), name)
-	}
-	return obj.(*v1beta1.ManagedClusterInfo), nil
+	listers.ResourceIndexer[*clusterinfov1beta1.ManagedClusterInfo]
 }

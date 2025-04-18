@@ -13,7 +13,7 @@ type FakeImageregistryV1alpha1 struct {
 }
 
 func (c *FakeImageregistryV1alpha1) ManagedClusterImageRegistries(namespace string) v1alpha1.ManagedClusterImageRegistryInterface {
-	return &FakeManagedClusterImageRegistries{c, namespace}
+	return newFakeManagedClusterImageRegistries(c, namespace)
 }
 
 // RESTClient returns a RESTClient that is used to communicate

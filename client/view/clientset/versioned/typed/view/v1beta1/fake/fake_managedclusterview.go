@@ -3,123 +3,34 @@
 package fake
 
 import (
-	"context"
-
+	viewv1beta1 "github.com/stolostron/cluster-lifecycle-api/client/view/clientset/versioned/typed/view/v1beta1"
 	v1beta1 "github.com/stolostron/cluster-lifecycle-api/view/v1beta1"
-	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	labels "k8s.io/apimachinery/pkg/labels"
-	types "k8s.io/apimachinery/pkg/types"
-	watch "k8s.io/apimachinery/pkg/watch"
-	testing "k8s.io/client-go/testing"
+	gentype "k8s.io/client-go/gentype"
 )
 
-// FakeManagedClusterViews implements ManagedClusterViewInterface
-type FakeManagedClusterViews struct {
+// fakeManagedClusterViews implements ManagedClusterViewInterface
+type fakeManagedClusterViews struct {
+	*gentype.FakeClientWithList[*v1beta1.ManagedClusterView, *v1beta1.ManagedClusterViewList]
 	Fake *FakeViewV1beta1
-	ns   string
 }
 
-var managedclusterviewsResource = v1beta1.SchemeGroupVersion.WithResource("managedclusterviews")
-
-var managedclusterviewsKind = v1beta1.SchemeGroupVersion.WithKind("ManagedClusterView")
-
-// Get takes name of the managedClusterView, and returns the corresponding managedClusterView object, and an error if there is any.
-func (c *FakeManagedClusterViews) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.ManagedClusterView, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewGetAction(managedclusterviewsResource, c.ns, name), &v1beta1.ManagedClusterView{})
-
-	if obj == nil {
-		return nil, err
+func newFakeManagedClusterViews(fake *FakeViewV1beta1, namespace string) viewv1beta1.ManagedClusterViewInterface {
+	return &fakeManagedClusterViews{
+		gentype.NewFakeClientWithList[*v1beta1.ManagedClusterView, *v1beta1.ManagedClusterViewList](
+			fake.Fake,
+			namespace,
+			v1beta1.SchemeGroupVersion.WithResource("managedclusterviews"),
+			v1beta1.SchemeGroupVersion.WithKind("ManagedClusterView"),
+			func() *v1beta1.ManagedClusterView { return &v1beta1.ManagedClusterView{} },
+			func() *v1beta1.ManagedClusterViewList { return &v1beta1.ManagedClusterViewList{} },
+			func(dst, src *v1beta1.ManagedClusterViewList) { dst.ListMeta = src.ListMeta },
+			func(list *v1beta1.ManagedClusterViewList) []*v1beta1.ManagedClusterView {
+				return gentype.ToPointerSlice(list.Items)
+			},
+			func(list *v1beta1.ManagedClusterViewList, items []*v1beta1.ManagedClusterView) {
+				list.Items = gentype.FromPointerSlice(items)
+			},
+		),
+		fake,
 	}
-	return obj.(*v1beta1.ManagedClusterView), err
-}
-
-// List takes label and field selectors, and returns the list of ManagedClusterViews that match those selectors.
-func (c *FakeManagedClusterViews) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.ManagedClusterViewList, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewListAction(managedclusterviewsResource, managedclusterviewsKind, c.ns, opts), &v1beta1.ManagedClusterViewList{})
-
-	if obj == nil {
-		return nil, err
-	}
-
-	label, _, _ := testing.ExtractFromListOptions(opts)
-	if label == nil {
-		label = labels.Everything()
-	}
-	list := &v1beta1.ManagedClusterViewList{ListMeta: obj.(*v1beta1.ManagedClusterViewList).ListMeta}
-	for _, item := range obj.(*v1beta1.ManagedClusterViewList).Items {
-		if label.Matches(labels.Set(item.Labels)) {
-			list.Items = append(list.Items, item)
-		}
-	}
-	return list, err
-}
-
-// Watch returns a watch.Interface that watches the requested managedClusterViews.
-func (c *FakeManagedClusterViews) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
-	return c.Fake.
-		InvokesWatch(testing.NewWatchAction(managedclusterviewsResource, c.ns, opts))
-
-}
-
-// Create takes the representation of a managedClusterView and creates it.  Returns the server's representation of the managedClusterView, and an error, if there is any.
-func (c *FakeManagedClusterViews) Create(ctx context.Context, managedClusterView *v1beta1.ManagedClusterView, opts v1.CreateOptions) (result *v1beta1.ManagedClusterView, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewCreateAction(managedclusterviewsResource, c.ns, managedClusterView), &v1beta1.ManagedClusterView{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.ManagedClusterView), err
-}
-
-// Update takes the representation of a managedClusterView and updates it. Returns the server's representation of the managedClusterView, and an error, if there is any.
-func (c *FakeManagedClusterViews) Update(ctx context.Context, managedClusterView *v1beta1.ManagedClusterView, opts v1.UpdateOptions) (result *v1beta1.ManagedClusterView, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateAction(managedclusterviewsResource, c.ns, managedClusterView), &v1beta1.ManagedClusterView{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.ManagedClusterView), err
-}
-
-// UpdateStatus was generated because the type contains a Status member.
-// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeManagedClusterViews) UpdateStatus(ctx context.Context, managedClusterView *v1beta1.ManagedClusterView, opts v1.UpdateOptions) (*v1beta1.ManagedClusterView, error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewUpdateSubresourceAction(managedclusterviewsResource, "status", c.ns, managedClusterView), &v1beta1.ManagedClusterView{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.ManagedClusterView), err
-}
-
-// Delete takes name of the managedClusterView and deletes it. Returns an error if one occurs.
-func (c *FakeManagedClusterViews) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
-	_, err := c.Fake.
-		Invokes(testing.NewDeleteActionWithOptions(managedclusterviewsResource, c.ns, name, opts), &v1beta1.ManagedClusterView{})
-
-	return err
-}
-
-// DeleteCollection deletes a collection of objects.
-func (c *FakeManagedClusterViews) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(managedclusterviewsResource, c.ns, listOpts)
-
-	_, err := c.Fake.Invokes(action, &v1beta1.ManagedClusterViewList{})
-	return err
-}
-
-// Patch applies the patch and returns the patched managedClusterView.
-func (c *FakeManagedClusterViews) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.ManagedClusterView, err error) {
-	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(managedclusterviewsResource, c.ns, name, pt, data, subresources...), &v1beta1.ManagedClusterView{})
-
-	if obj == nil {
-		return nil, err
-	}
-	return obj.(*v1beta1.ManagedClusterView), err
 }
