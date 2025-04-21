@@ -70,6 +70,7 @@ var map_KlusterletConfigSpec = map[string]string{
 	"installMode":                            "InstallMode is the mode to install the klusterlet",
 	"bootstrapKubeConfigs":                   "BootstrapKubeConfigSecrets is the list of secrets that reflects the Klusterlet.Spec.RegistrationConfiguration.BootstrapKubeConfigs.",
 	"featureGates":                           "FeatureGates is the list of feature gate for the klusterlet agent. If it is set empty, default feature gates will be used.",
+	"clusterClaimConfiguration":              "ClusterClaimConfiguration represents the configuration of ClusterClaim Effective only when the `ClusterClaim` feature gate is enabled.",
 }
 
 func (KlusterletConfigSpec) SwaggerDoc() map[string]string {

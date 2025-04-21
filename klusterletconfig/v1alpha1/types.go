@@ -95,6 +95,11 @@ type KlusterletConfigSpec struct {
 	// FeatureGates is the list of feature gate for the klusterlet agent.
 	// If it is set empty, default feature gates will be used.
 	FeatureGates []operatorv1.FeatureGate `json:"featureGates,omitempty"`
+
+	// ClusterClaimConfiguration represents the configuration of ClusterClaim
+	// Effective only when the `ClusterClaim` feature gate is enabled.
+	// +optional
+	ClusterClaimConfiguration *operatorv1.ClusterClaimConfiguration `json:"clusterClaimConfiguration,omitempty"`
 }
 
 // KlusterletConfigStatus defines the observed state of KlusterletConfig.

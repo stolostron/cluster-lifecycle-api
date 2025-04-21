@@ -269,8 +269,8 @@ spec:
                           - csr
                           - awsirsa
                           type: string
-                        awsirsa:
-                          description: AwsIrsa represents the configuration for awsirsa
+                        awsisra:
+                          description: AwsIrsa represents the configuration for awsisra
                             driver.
                           properties:
                             autoApprovedIdentities:

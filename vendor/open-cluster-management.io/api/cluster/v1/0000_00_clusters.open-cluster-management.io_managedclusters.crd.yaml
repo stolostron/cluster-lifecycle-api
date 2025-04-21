@@ -152,6 +152,7 @@ spec:
                   required:
                   - effect
                   - key
+                  - timeAdded
                   type: object
                 type: array
             required:

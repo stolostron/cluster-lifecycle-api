@@ -161,6 +161,11 @@ func (in *KlusterletConfigSpec) DeepCopyInto(out *KlusterletConfigSpec) {
 		*out = make([]v1.FeatureGate, len(*in))
 		copy(*out, *in)
 	}
+	if in.ClusterClaimConfiguration != nil {
+		in, out := &in.ClusterClaimConfiguration, &out.ClusterClaimConfiguration
+		*out = new(v1.ClusterClaimConfiguration)
+		(*in).DeepCopyInto(*out)
+	}
 	return
 }
 

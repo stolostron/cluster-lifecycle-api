@@ -2,9 +2,10 @@ package klusterletconfig
 
 import (
 	"fmt"
+	"reflect"
+
 	"k8s.io/apimachinery/pkg/util/sets"
 	operatorv1 "open-cluster-management.io/api/operator/v1"
-	"reflect"
 
 	klusterletconfigv1alpha1 "github.com/stolostron/cluster-lifecycle-api/klusterletconfig/v1alpha1"
 )
@@ -22,6 +23,7 @@ var klusterletConfigMergeFuncs map[string]func(base, override interface{}) (inte
 	"BootstrapKubeConfigs":                   override,
 	"HubKubeAPIServerConfig":                 mergeHubKubeAPIServerConfig,
 	"FeatureGates":                           mergeFeatureGates,
+	"ClusterClaimConfiguration":              mergeClusterClaimConfiguration,
 }
 
 func override(base, toMerge interface{}) (interface{}, error) {
@@ -148,6 +150,41 @@ func mergeFeatureGates(base, toMerge interface{}) (interface{}, error) {
 		}
 	}
 	return new, nil
+}
+
+func mergeClusterClaimConfiguration(base, toMerge interface{}) (interface{}, error) {
+	old, ok := base.(*operatorv1.ClusterClaimConfiguration)
+	if !ok {
+		return nil, fmt.Errorf("base is not of type ClusterClaimConfiguration")
+	}
+	new, ok := toMerge.(*operatorv1.ClusterClaimConfiguration)
+	if !ok {
+		return nil, fmt.Errorf("toMerge is not of type ClusterClaimConfiguration")
+	}
+
+	if old == nil {
+		return new, nil
+	}
+	if new == nil {
+		return old, nil
+	}
+
+	config := new.DeepCopy()
+	if config.MaxCustomClusterClaims < old.MaxCustomClusterClaims {
+		config.MaxCustomClusterClaims = old.MaxCustomClusterClaims
+	}
+
+	newMap := sets.New[string]()
+	for _, nc := range new.ReservedClusterClaimSuffixes {
+		newMap.Insert(nc)
+	}
+
+	for _, oc := range old.ReservedClusterClaimSuffixes {
+		if !newMap.Has(oc) {
+			config.ReservedClusterClaimSuffixes = append(config.ReservedClusterClaimSuffixes, oc)
+		}
+	}
+	return config, nil
 }
 
 func containsCA(bundles []klusterletconfigv1alpha1.CABundle, bundle klusterletconfigv1alpha1.CABundle) bool {

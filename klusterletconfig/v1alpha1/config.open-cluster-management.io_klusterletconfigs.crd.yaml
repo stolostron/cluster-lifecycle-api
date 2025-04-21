@@ -96,9 +96,28 @@ spec:
                 required:
                 - type
                 type: object
+              clusterClaimConfiguration:
+                description: |-
+                  ClusterClaimConfiguration represents the configuration of ClusterClaim
+                  Effective only when the `ClusterClaim` feature gate is enabled.
+                properties:
+                  maxCustomClusterClaims:
+                    default: 20
+                    description: Maximum number of custom ClusterClaims allowed.
+                    format: int32
+                    type: integer
+                  reservedClusterClaimSuffixes:
+                    description: Custom suffixes for reserved ClusterClaims.
+                    items:
+                      type: string
+                    type: array
+                required:
+                - maxCustomClusterClaims
+                type: object
               featureGates:
-                description: FeatureGates is the list of feature gate for the klusterlet
-                  agent. If it is set empty, default feature gates will be used.
+                description: |-
+                  FeatureGates is the list of feature gate for the klusterlet agent.
+                  If it is set empty, default feature gates will be used.
                 items:
                   properties:
                     feature:
@@ -106,10 +125,10 @@ spec:
                       type: string
                     mode:
                       default: Disable
-                      description: Mode is either Enable, Disable, "" where "" is
-                        Disable by default. In Enable mode, a valid feature gate `featuregate/Foo`
-                        will be set to "--featuregate/Foo=true". In Disable mode,
-                        a valid feature gate `featuregate/Foo` will be set to "--featuregate/Foo=false".
+                      description: |-
+                        Mode is either Enable, Disable, "" where "" is Disable by default.
+                        In Enable mode, a valid feature gate `featuregate/Foo` will be set to "--featuregate/Foo=true".
+                        In Disable mode, a valid feature gate `featuregate/Foo` will be set to "--featuregate/Foo=false".
                       enum:
                       - Enable
                       - Disable

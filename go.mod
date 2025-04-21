@@ -57,3 +57,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.4.2 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
+
+replace open-cluster-management.io/api => github.com/o-farag/api v0.0.0-20250414200351-34775f31a280

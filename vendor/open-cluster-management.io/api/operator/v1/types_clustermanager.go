@@ -129,9 +129,9 @@ type RegistrationDriverHub struct {
 	// +optional
 	CSR *CSRConfig `json:"csr,omitempty"`
 
-	// AwsIrsa represents the configuration for awsirsa driver.
+	// AwsIrsa represents the configuration for awsisra driver.
 	// +optional
-	AwsIrsa *AwsIrsaConfig `json:"awsirsa,omitempty"`
+	AwsIrsa *AwsIrsaConfig `json:"awsisra,omitempty"`
 }
 
 type CSRConfig struct {

@@ -297,6 +297,111 @@ func TestMergeFeatureGates(t *testing.T) {
 	}
 }
 
+func TestMergeClusterClaimConfiguration(t *testing.T) {
+	testcases := []struct {
+		name   string
+		old    *klusterletconfigv1alpha1.KlusterletConfig
+		new    *klusterletconfigv1alpha1.KlusterletConfig
+		expect *operatorv1.ClusterClaimConfiguration
+	}{
+		{
+			name: "empty new",
+			old: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims:       10,
+						ReservedClusterClaimSuffixes: []string{"mce1.io"},
+					},
+				},
+			},
+			new: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{},
+			},
+			expect: &operatorv1.ClusterClaimConfiguration{
+				MaxCustomClusterClaims:       10,
+				ReservedClusterClaimSuffixes: []string{"mce1.io"},
+			},
+		},
+		{
+			name: "empty old",
+			old: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{},
+			},
+			new: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims:       10,
+						ReservedClusterClaimSuffixes: []string{"mce2.io"},
+					},
+				},
+			},
+			expect: &operatorv1.ClusterClaimConfiguration{
+				MaxCustomClusterClaims:       10,
+				ReservedClusterClaimSuffixes: []string{"mce2.io"},
+			},
+		},
+		{
+			name: "merge the two, old max",
+			old: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims:       15,
+						ReservedClusterClaimSuffixes: []string{"mce1.io"},
+					},
+				},
+			},
+			new: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims:       10,
+						ReservedClusterClaimSuffixes: []string{"mce2.io"},
+					},
+				},
+			},
+			expect: &operatorv1.ClusterClaimConfiguration{
+				MaxCustomClusterClaims:       15,
+				ReservedClusterClaimSuffixes: []string{"mce2.io", "mce1.io"},
+			},
+		},
+		{
+			name: "merge the two, new max",
+			old: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims:       15,
+						ReservedClusterClaimSuffixes: []string{"mce1.io"},
+					},
+				},
+			},
+			new: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims:       20,
+						ReservedClusterClaimSuffixes: []string{"mce2.io"},
+					},
+				},
+			},
+			expect: &operatorv1.ClusterClaimConfiguration{
+				MaxCustomClusterClaims:       20,
+				ReservedClusterClaimSuffixes: []string{"mce2.io", "mce1.io"},
+			},
+		},
+	}
+
+	for _, testcase := range testcases {
+		t.Run(testcase.name, func(t *testing.T) {
+			merged, err := mergeClusterClaimConfiguration(testcase.old.Spec.ClusterClaimConfiguration,
+				testcase.new.Spec.ClusterClaimConfiguration)
+			if err != nil {
+				t.Fatalf("unexpected error: %v", err)
+			}
+			if !reflect.DeepEqual(merged, testcase.expect) {
+				t.Errorf("expected: %v, got: %v", testcase.expect, merged)
+			}
+		})
+	}
+}
+
 func TestMergeHubKubeAPIServerConfig(test *testing.T) {
 	testcases := []struct {
 		name     string
