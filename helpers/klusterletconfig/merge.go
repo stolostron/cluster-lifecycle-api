@@ -24,6 +24,7 @@ var klusterletConfigMergeFuncs map[string]func(base, override interface{}) (inte
 	"HubKubeAPIServerConfig":                 mergeHubKubeAPIServerConfig,
 	"FeatureGates":                           mergeFeatureGates,
 	"ClusterClaimConfiguration":              mergeClusterClaimConfiguration,
+	"MultiHubConfig":                         override,
 }
 
 func override(base, toMerge interface{}) (interface{}, error) {
