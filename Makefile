@@ -3,9 +3,6 @@ SHELL :=/bin/bash
 all: build
 .PHONY: all
 
-# Ensure update-scripts are run before crd-gen so updates to Godoc are included in CRDs.
-update-codegen-crds: update-scripts
-
 # Include the library makefile
 include $(addprefix ./vendor/github.com/openshift/build-machinery-go/make/, \
 	golang.mk \
@@ -59,11 +56,11 @@ verify-scripts:
 	bash -x hack/verify-crds.sh
 	bash -x hack/verify-codegen.sh
 .PHONY: verify-scripts
-verify: verify-scripts verify-codegen-crds
+verify: verify-scripts
 
 update-scripts:
 	hack/update-deepcopy.sh
 	hack/update-swagger-docs.sh
 	hack/update-codegen.sh
 .PHONY: update-scripts
-update: update-scripts update-codegen-crds
+update: update-scripts
