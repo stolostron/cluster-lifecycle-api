@@ -624,7 +624,7 @@ k8s.io/utils/net
 k8s.io/utils/pointer
 k8s.io/utils/ptr
 k8s.io/utils/trace
-# open-cluster-management.io/api v0.16.2-0.20250416130057-11622a5f2170
+# open-cluster-management.io/api v0.16.2-0.20250422072120-cadf714c3055
 ## explicit; go 1.23.6
 open-cluster-management.io/api/cluster/v1
 open-cluster-management.io/api/operator/v1
