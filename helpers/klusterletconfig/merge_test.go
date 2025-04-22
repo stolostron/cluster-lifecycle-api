@@ -302,24 +302,22 @@ func TestMergeClusterClaimConfiguration(t *testing.T) {
 		name   string
 		old    *klusterletconfigv1alpha1.KlusterletConfig
 		new    *klusterletconfigv1alpha1.KlusterletConfig
-		expect *operatorv1.ClusterClaimConfiguration
+		expect *klusterletconfigv1alpha1.ClusterClaimConfiguration
 	}{
 		{
 			name: "empty new",
 			old: &klusterletconfigv1alpha1.KlusterletConfig{
 				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
-					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
-						MaxCustomClusterClaims:       10,
-						ReservedClusterClaimSuffixes: []string{"mce1.io"},
+					ClusterClaimConfiguration: &klusterletconfigv1alpha1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims: 10,
 					},
 				},
 			},
 			new: &klusterletconfigv1alpha1.KlusterletConfig{
 				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{},
 			},
-			expect: &operatorv1.ClusterClaimConfiguration{
-				MaxCustomClusterClaims:       10,
-				ReservedClusterClaimSuffixes: []string{"mce1.io"},
+			expect: &klusterletconfigv1alpha1.ClusterClaimConfiguration{
+				MaxCustomClusterClaims: 10,
 			},
 		},
 		{
@@ -329,61 +327,53 @@ func TestMergeClusterClaimConfiguration(t *testing.T) {
 			},
 			new: &klusterletconfigv1alpha1.KlusterletConfig{
 				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
-					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
-						MaxCustomClusterClaims:       10,
-						ReservedClusterClaimSuffixes: []string{"mce2.io"},
+					ClusterClaimConfiguration: &klusterletconfigv1alpha1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims: 10,
 					},
 				},
 			},
-			expect: &operatorv1.ClusterClaimConfiguration{
-				MaxCustomClusterClaims:       10,
-				ReservedClusterClaimSuffixes: []string{"mce2.io"},
+			expect: &klusterletconfigv1alpha1.ClusterClaimConfiguration{
+				MaxCustomClusterClaims: 10,
 			},
 		},
 		{
 			name: "merge the two, old max",
 			old: &klusterletconfigv1alpha1.KlusterletConfig{
 				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
-					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
-						MaxCustomClusterClaims:       15,
-						ReservedClusterClaimSuffixes: []string{"mce1.io"},
+					ClusterClaimConfiguration: &klusterletconfigv1alpha1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims: 15,
 					},
 				},
 			},
 			new: &klusterletconfigv1alpha1.KlusterletConfig{
 				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
-					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
-						MaxCustomClusterClaims:       10,
-						ReservedClusterClaimSuffixes: []string{"mce2.io"},
+					ClusterClaimConfiguration: &klusterletconfigv1alpha1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims: 10,
 					},
 				},
 			},
-			expect: &operatorv1.ClusterClaimConfiguration{
-				MaxCustomClusterClaims:       15,
-				ReservedClusterClaimSuffixes: []string{"mce2.io", "mce1.io"},
+			expect: &klusterletconfigv1alpha1.ClusterClaimConfiguration{
+				MaxCustomClusterClaims: 15,
 			},
 		},
 		{
 			name: "merge the two, new max",
 			old: &klusterletconfigv1alpha1.KlusterletConfig{
 				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
-					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
-						MaxCustomClusterClaims:       15,
-						ReservedClusterClaimSuffixes: []string{"mce1.io"},
+					ClusterClaimConfiguration: &klusterletconfigv1alpha1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims: 15,
 					},
 				},
 			},
 			new: &klusterletconfigv1alpha1.KlusterletConfig{
 				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
-					ClusterClaimConfiguration: &operatorv1.ClusterClaimConfiguration{
-						MaxCustomClusterClaims:       20,
-						ReservedClusterClaimSuffixes: []string{"mce2.io"},
+					ClusterClaimConfiguration: &klusterletconfigv1alpha1.ClusterClaimConfiguration{
+						MaxCustomClusterClaims: 20,
 					},
 				},
 			},
-			expect: &operatorv1.ClusterClaimConfiguration{
-				MaxCustomClusterClaims:       20,
-				ReservedClusterClaimSuffixes: []string{"mce2.io", "mce1.io"},
+			expect: &klusterletconfigv1alpha1.ClusterClaimConfiguration{
+				MaxCustomClusterClaims: 20,
 			},
 		},
 	}

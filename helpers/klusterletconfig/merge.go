@@ -153,11 +153,11 @@ func mergeFeatureGates(base, toMerge interface{}) (interface{}, error) {
 }
 
 func mergeClusterClaimConfiguration(base, toMerge interface{}) (interface{}, error) {
-	old, ok := base.(*operatorv1.ClusterClaimConfiguration)
+	old, ok := base.(*klusterletconfigv1alpha1.ClusterClaimConfiguration)
 	if !ok {
 		return nil, fmt.Errorf("base is not of type ClusterClaimConfiguration")
 	}
-	new, ok := toMerge.(*operatorv1.ClusterClaimConfiguration)
+	new, ok := toMerge.(*klusterletconfigv1alpha1.ClusterClaimConfiguration)
 	if !ok {
 		return nil, fmt.Errorf("toMerge is not of type ClusterClaimConfiguration")
 	}
@@ -174,16 +174,6 @@ func mergeClusterClaimConfiguration(base, toMerge interface{}) (interface{}, err
 		config.MaxCustomClusterClaims = old.MaxCustomClusterClaims
 	}
 
-	newMap := sets.New[string]()
-	for _, nc := range new.ReservedClusterClaimSuffixes {
-		newMap.Insert(nc)
-	}
-
-	for _, oc := range old.ReservedClusterClaimSuffixes {
-		if !newMap.Has(oc) {
-			config.ReservedClusterClaimSuffixes = append(config.ReservedClusterClaimSuffixes, oc)
-		}
-	}
 	return config, nil
 }
 

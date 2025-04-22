@@ -99,7 +99,7 @@ type KlusterletConfigSpec struct {
 	// ClusterClaimConfiguration represents the configuration of ClusterClaim
 	// Effective only when the `ClusterClaim` feature gate is enabled.
 	// +optional
-	ClusterClaimConfiguration *operatorv1.ClusterClaimConfiguration `json:"clusterClaimConfiguration,omitempty"`
+	ClusterClaimConfiguration *ClusterClaimConfiguration `json:"clusterClaimConfiguration,omitempty"`
 }
 
 // KlusterletConfigStatus defines the observed state of KlusterletConfig.
@@ -245,6 +245,15 @@ type KubeAPIServerProxyConfig struct {
 	// by the proxy server.
 	// +optional
 	CABundle []byte `json:"caBundle,omitempty"`
+}
+
+// ClusterClaimConfiguration represents the configuration of ClusterClaim
+type ClusterClaimConfiguration struct {
+	// Maximum number of custom ClusterClaims allowed.
+	// +kubebuilder:validation:Required
+	// +kubebuilder:default:=20
+	// +required
+	MaxCustomClusterClaims int32 `json:"maxCustomClusterClaims"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

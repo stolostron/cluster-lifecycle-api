@@ -21,6 +21,15 @@ func (CABundle) SwaggerDoc() map[string]string {
 	return map_CABundle
 }
 
+var map_ClusterClaimConfiguration = map[string]string{
+	"":                       "ClusterClaimConfiguration represents the configuration of ClusterClaim",
+	"maxCustomClusterClaims": "Maximum number of custom ClusterClaims allowed.",
+}
+
+func (ClusterClaimConfiguration) SwaggerDoc() map[string]string {
+	return map_ClusterClaimConfiguration
+}
+
 var map_ConfigMapReference = map[string]string{
 	"name":      "name is the metadata.name of the referenced config map",
 	"namespace": "name is the metadata.namespace of the referenced config map",
