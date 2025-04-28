@@ -88,17 +88,9 @@ type KlusterletConfigSpec struct {
 	// InstallMode is the mode to install the klusterlet
 	InstallMode *InstallMode `json:"installMode,omitempty"`
 
-	// MultiHubConfig contains configuration specific to multiple hub scenarios
+	// MultipleHubsConfig contains configuration specific to multiple hub scenarios
 	// +optional
-	MultiHubConfig *MultiHubConfig `json:"multiHubConfig,omitempty"`
-
-	// BootstrapKubeConfigs is the list of secrets that reflects the
-	// Klusterlet.Spec.RegistrationConfiguration.BootstrapKubeConfigs.
-	//
-	// Deprecated: Use MultiHubConfig.BootstrapKubeConfigs instead.
-	// This field will be removed in the next release.
-	// +optional
-	BootstrapKubeConfigs operatorv1.BootstrapKubeConfigs `json:"bootstrapKubeConfigs,omitempty"`
+	MultipleHubsConfig *MultipleHubsConfig `json:"multipleHubsConfig,omitempty"`
 
 	// FeatureGates is the list of feature gate for the klusterlet agent.
 	// If it is set empty, default feature gates will be used.
@@ -269,8 +261,8 @@ type ClusterClaimConfiguration struct {
 	MaxCustomClusterClaims int32 `json:"maxCustomClusterClaims"`
 }
 
-// MultiHubConfig contains configuration specific to multiple hub scenarios
-type MultiHubConfig struct {
+// MultipleHubsConfig contains configuration specific to multiple hub scenarios
+type MultipleHubsConfig struct {
 	// GenBootstrapKubeConfigStrategy controls the strategy for generating bootstrap kubeconfig files.
 	// Default - Generate bootstrap kubeconfigs only with the BootstrapKubeConfigs configured in KlusterletConfig.
 	// IncludeCurrentHub - When generating bootstrap kubeconfigs, automatically include the current hub's kubeconfig.

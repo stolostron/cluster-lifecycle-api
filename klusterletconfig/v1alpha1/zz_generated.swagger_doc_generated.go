@@ -77,8 +77,7 @@ var map_KlusterletConfigSpec = map[string]string{
 	"hubKubeAPIServerCABundle":               "HubKubeAPIServerCABundle is the CA bundle to verify the server certificate of the hub kube API against. If not present, CA bundle will be determined with the logic below: 1). Use the certificate of the named certificate configured in APIServer/cluster if FQDN matches; 2). Otherwise use the CA certificates from kube-root-ca.crt ConfigMap in the cluster namespace;\n\nDeprecated and maintained for backward compatibility, use HubKubeAPIServerConfig.ServerVarificationStrategy and HubKubeAPIServerConfig.TrustedCABundles instead",
 	"appliedManifestWorkEvictionGracePeriod": "AppliedManifestWorkEvictionGracePeriod is the eviction grace period the work agent will wait before evicting the AppliedManifestWorks, whose corresponding ManifestWorks are missing on the hub cluster, from the managed cluster. If not present, the default value of the work agent will be used. If its value is set to \"INFINITE\", it means the AppliedManifestWorks will never been evicted from the managed cluster.",
 	"installMode":                            "InstallMode is the mode to install the klusterlet",
-	"multiHubConfig":                         "MultiHubConfig contains configuration specific to multiple hub scenarios",
-	"bootstrapKubeConfigs":                   "BootstrapKubeConfigs is the list of secrets that reflects the Klusterlet.Spec.RegistrationConfiguration.BootstrapKubeConfigs.\n\nDeprecated: Use MultiHubConfig.BootstrapKubeConfigs instead. This field will be removed in the next release.",
+	"multipleHubsConfig":                     "MultipleHubsConfig contains configuration specific to multiple hub scenarios",
 	"featureGates":                           "FeatureGates is the list of feature gate for the klusterlet agent. If it is set empty, default feature gates will be used.",
 	"clusterClaimConfiguration":              "ClusterClaimConfiguration represents the configuration of ClusterClaim Effective only when the `ClusterClaim` feature gate is enabled.",
 }
@@ -118,14 +117,14 @@ func (KubeAPIServerProxyConfig) SwaggerDoc() map[string]string {
 	return map_KubeAPIServerProxyConfig
 }
 
-var map_MultiHubConfig = map[string]string{
-	"":                               "MultiHubConfig contains configuration specific to multiple hub scenarios",
+var map_MultipleHubsConfig = map[string]string{
+	"":                               "MultipleHubsConfig contains configuration specific to multiple hub scenarios",
 	"genBootstrapKubeConfigStrategy": "GenBootstrapKubeConfigStrategy controls the strategy for generating bootstrap kubeconfig files. Default - Generate bootstrap kubeconfigs only with the BootstrapKubeConfigs configured in KlusterletConfig. IncludeCurrentHub - When generating bootstrap kubeconfigs, automatically include the current hub's kubeconfig.",
 	"bootstrapKubeConfigs":           "BootstrapKubeConfigs is the list of bootstrap kubeconfigs for multiple hubs",
 }
 
-func (MultiHubConfig) SwaggerDoc() map[string]string {
-	return map_MultiHubConfig
+func (MultipleHubsConfig) SwaggerDoc() map[string]string {
+	return map_MultipleHubsConfig
 }
 
 var map_NoOperator = map[string]string{

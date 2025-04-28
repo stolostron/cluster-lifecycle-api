@@ -20,11 +20,10 @@ var klusterletConfigMergeFuncs map[string]func(base, override interface{}) (inte
 	"HubKubeAPIServerCABundle":               override,
 	"AppliedManifestWorkEvictionGracePeriod": override,
 	"InstallMode":                            override,
-	"BootstrapKubeConfigs":                   override,
 	"HubKubeAPIServerConfig":                 mergeHubKubeAPIServerConfig,
 	"FeatureGates":                           mergeFeatureGates,
 	"ClusterClaimConfiguration":              mergeClusterClaimConfiguration,
-	"MultiHubConfig":                         override,
+	"MultipleHubsConfig":                     override,
 }
 
 func override(base, toMerge interface{}) (interface{}, error) {
