@@ -46,13 +46,25 @@ func NewFilteredManagedClusterActionInformer(client versioned.Interface, namespa
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ActionV1beta1().ManagedClusterActions(namespace).List(context.TODO(), options)
+				return client.ActionV1beta1().ManagedClusterActions(namespace).List(context.Background(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ActionV1beta1().ManagedClusterActions(namespace).Watch(context.TODO(), options)
+				return client.ActionV1beta1().ManagedClusterActions(namespace).Watch(context.Background(), options)
+			},
+			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.ActionV1beta1().ManagedClusterActions(namespace).List(ctx, options)
+			},
+			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.ActionV1beta1().ManagedClusterActions(namespace).Watch(ctx, options)
 			},
 		},
 		&clusterlifecycleapiactionv1beta1.ManagedClusterAction{},

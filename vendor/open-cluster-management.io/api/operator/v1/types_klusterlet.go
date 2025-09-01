@@ -1,3 +1,4 @@
+// Copyright Contributors to the Open Cluster Management project
 package v1
 
 import (
@@ -151,13 +152,17 @@ type RegistrationConfiguration struct {
 	// +optional
 	ClusterAnnotations map[string]string `json:"clusterAnnotations,omitempty"`
 
-	// KubeAPIQPS indicates the maximum QPS while talking with apiserver of hub cluster from the spoke cluster.
+	// ClusterLabels is labels set on ManagedCluster when creating only, other actors can update it afterwards.
+	// +optional
+	ClusterLabels map[string]string `json:"clusterLabels,omitempty"`
+
+	// KubeAPIQPS indicates the maximum QPS while talking with apiserver on the spoke cluster.
 	// If it is set empty, use the default value: 50
 	// +optional
 	// +kubebuilder:default:=50
 	KubeAPIQPS int32 `json:"kubeAPIQPS,omitempty"`
 
-	// KubeAPIBurst indicates the maximum burst of the throttle while talking with apiserver of hub cluster from the spoke cluster.
+	// KubeAPIBurst indicates the maximum burst of the throttle while talking with apiserver on the spoke cluster.
 	// If it is set empty, use the default value: 100
 	// +optional
 	// +kubebuilder:default:=100
@@ -193,6 +198,9 @@ type ClusterClaimConfiguration struct {
 
 	// Custom suffixes for reserved ClusterClaims.
 	// +optional
+	// +kubebuilder:validation:MaxItems=10
+	// +kubebuilder:validation:items:MinLength=1
+	// +kubebuilder:validation:items:MaxLength=64
 	ReservedClusterClaimSuffixes []string `json:"reservedClusterClaimSuffixes,omitempty"`
 }
 
@@ -200,7 +208,7 @@ type RegistrationDriver struct {
 	// Type of the authentication used by managedcluster to register as well as pull work from hub. Possible values are csr and awsirsa.
 	// +required
 	// +kubebuilder:default:=csr
-	// +kubebuilder:validation:Enum=csr;awsirsa
+	// +kubebuilder:validation:Enum=csr;awsirsa;grpc
 	AuthType string `json:"authType,omitempty"`
 
 	// Contain the details required for registering with hub cluster (ie: an EKS cluster) using AWS IAM roles for service account.
@@ -277,17 +285,29 @@ type WorkAgentConfiguration struct {
 	// +optional
 	FeatureGates []FeatureGate `json:"featureGates,omitempty"`
 
-	// KubeAPIQPS indicates the maximum QPS while talking with apiserver of hub cluster from the spoke cluster.
+	// KubeAPIQPS indicates the maximum QPS while talking with apiserver on the spoke cluster.
 	// If it is set empty, use the default value: 50
 	// +optional
 	// +kubebuilder:default:=50
 	KubeAPIQPS int32 `json:"kubeAPIQPS,omitempty"`
 
-	// KubeAPIBurst indicates the maximum burst of the throttle while talking with apiserver of hub cluster from the spoke cluster.
+	// KubeAPIBurst indicates the maximum burst of the throttle while talking with apiserver on the spoke cluster.
 	// If it is set empty, use the default value: 100
 	// +optional
 	// +kubebuilder:default:=100
 	KubeAPIBurst int32 `json:"kubeAPIBurst,omitempty"`
+
+	// HubKubeAPIQPS indicates the maximum QPS while talking with apiserver on the hub cluster.
+	// If it is set empty, use the default value: 50
+	// +optional
+	// +kubebuilder:default:=50
+	HubKubeAPIQPS int32 `json:"hubKubeAPIQPS,omitempty"`
+
+	// HubKubeAPIBurst indicates the maximum burst of the throttle while talking with apiserver on the hub cluster.
+	// If it is set empty, use the default value: 100
+	// +optional
+	// +kubebuilder:default:=100
+	HubKubeAPIBurst int32 `json:"hubKubeAPIBurst,omitempty"`
 
 	// AppliedManifestWorkEvictionGracePeriod is the eviction grace period the work agent will wait before
 	// evicting the AppliedManifestWorks, whose corresponding ManifestWorks are missing on the hub cluster, from
@@ -296,6 +316,14 @@ type WorkAgentConfiguration struct {
 	// +kubebuilder:validation:Type=string
 	// +kubebuilder:validation:Pattern="^([0-9]+(s|m|h))+$"
 	AppliedManifestWorkEvictionGracePeriod *metav1.Duration `json:"appliedManifestWorkEvictionGracePeriod,omitempty"`
+
+	// StatusSyncInterval is the interval for the work agent to check the status of ManifestWorks.
+	// Larger value means less frequent status sync and less api calls to the managed cluster, vice versa.
+	// The value(x) should be: 5s <= x <= 1h.
+	// +optional
+	// +kubebuilder:validation:Type=string
+	// +kubebuilder:validation:Pattern="^([0-9]+(s|m|h))+$"
+	StatusSyncInterval *metav1.Duration `json:"statusSyncInterval,omitempty"`
 }
 
 const (

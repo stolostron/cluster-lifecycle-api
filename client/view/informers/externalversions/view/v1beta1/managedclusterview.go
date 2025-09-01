@@ -46,13 +46,25 @@ func NewFilteredManagedClusterViewInformer(client versioned.Interface, namespace
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ViewV1beta1().ManagedClusterViews(namespace).List(context.TODO(), options)
+				return client.ViewV1beta1().ManagedClusterViews(namespace).List(context.Background(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ViewV1beta1().ManagedClusterViews(namespace).Watch(context.TODO(), options)
+				return client.ViewV1beta1().ManagedClusterViews(namespace).Watch(context.Background(), options)
+			},
+			ListWithContextFunc: func(ctx context.Context, options v1.ListOptions) (runtime.Object, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.ViewV1beta1().ManagedClusterViews(namespace).List(ctx, options)
+			},
+			WatchFuncWithContext: func(ctx context.Context, options v1.ListOptions) (watch.Interface, error) {
+				if tweakListOptions != nil {
+					tweakListOptions(&options)
+				}
+				return client.ViewV1beta1().ManagedClusterViews(namespace).Watch(ctx, options)
 			},
 		},
 		&clusterlifecycleapiviewv1beta1.ManagedClusterView{},
