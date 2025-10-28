@@ -174,6 +174,105 @@ func TestMergeKlusterletConfigs(test *testing.T) {
 				},
 			},
 		},
+		{
+			name: "migrate deprecated fields to HubKubeAPIServerConfig when both are present",
+			kcs: []*klusterletconfigv1alpha1.KlusterletConfig{
+				{
+					Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+						HubKubeAPIServerConfig: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+							ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+						},
+					},
+				},
+				{
+					Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+						HubKubeAPIServerURL: "https://hub-api-server",
+						HubKubeAPIServerProxyConfig: klusterletconfigv1alpha1.KubeAPIServerProxyConfig{
+							HTTPSProxy: "https://proxy-server",
+						},
+						HubKubeAPIServerCABundle: []byte("ca-bundle-data"),
+					},
+				},
+			},
+			expected: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					HubKubeAPIServerConfig: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+						URL:                        "https://hub-api-server",
+						ProxyURL:                   "https://proxy-server",
+						ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+					},
+					HubKubeAPIServerURL: "https://hub-api-server",
+					HubKubeAPIServerProxyConfig: klusterletconfigv1alpha1.KubeAPIServerProxyConfig{
+						HTTPSProxy: "https://proxy-server",
+					},
+					HubKubeAPIServerCABundle: []byte("ca-bundle-data"),
+				},
+			},
+		},
+		{
+			name: "do not override HubKubeAPIServerConfig fields if already set",
+			kcs: []*klusterletconfigv1alpha1.KlusterletConfig{
+				{
+					Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+						HubKubeAPIServerConfig: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+							URL:                        "https://existing-hub",
+							ProxyURL:                   "https://existing-proxy",
+							ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+						},
+					},
+				},
+				{
+					Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+						HubKubeAPIServerURL: "https://deprecated-hub",
+						HubKubeAPIServerProxyConfig: klusterletconfigv1alpha1.KubeAPIServerProxyConfig{
+							HTTPSProxy: "https://deprecated-proxy",
+						},
+					},
+				},
+			},
+			expected: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					HubKubeAPIServerConfig: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+						URL:                        "https://existing-hub",
+						ProxyURL:                   "https://existing-proxy",
+						ServerVerificationStrategy: klusterletconfigv1alpha1.ServerVerificationStrategyUseCustomCABundles,
+					},
+					HubKubeAPIServerURL: "https://deprecated-hub",
+					HubKubeAPIServerProxyConfig: klusterletconfigv1alpha1.KubeAPIServerProxyConfig{
+						HTTPSProxy: "https://deprecated-proxy",
+					},
+				},
+			},
+		},
+		{
+			name: "prefer HTTPSProxy over HTTPProxy when migrating",
+			kcs: []*klusterletconfigv1alpha1.KlusterletConfig{
+				{
+					Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+						HubKubeAPIServerConfig: &klusterletconfigv1alpha1.KubeAPIServerConfig{},
+					},
+				},
+				{
+					Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+						HubKubeAPIServerProxyConfig: klusterletconfigv1alpha1.KubeAPIServerProxyConfig{
+							HTTPProxy:  "http://http-proxy",
+							HTTPSProxy: "https://https-proxy",
+						},
+					},
+				},
+			},
+			expected: &klusterletconfigv1alpha1.KlusterletConfig{
+				Spec: klusterletconfigv1alpha1.KlusterletConfigSpec{
+					HubKubeAPIServerConfig: &klusterletconfigv1alpha1.KubeAPIServerConfig{
+						ProxyURL: "https://https-proxy",
+					},
+					HubKubeAPIServerProxyConfig: klusterletconfigv1alpha1.KubeAPIServerProxyConfig{
+						HTTPProxy:  "http://http-proxy",
+						HTTPSProxy: "https://https-proxy",
+					},
+				},
+			},
+		},
 	}
 
 	for _, testcase := range testcases {
