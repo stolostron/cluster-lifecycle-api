@@ -1,0 +1,145 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.17.3
+  name: userpermissions.clusterview.open-cluster-management.io
+spec:
+  group: clusterview.open-cluster-management.io
+  names:
+    kind: UserPermission
+    listKind: UserPermissionList
+    plural: userpermissions
+    singular: userpermission
+  scope: Cluster
+  versions:
+  - name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        description: |-
+          UserPermission represents the permissions a user has across the fleet of managed clusters.
+          Each UserPermission item corresponds to a labeled ClusterRole that the user has been granted
+          access to via ClusterPermission resources on the hub cluster.
+          The name of the UserPermission resource is the name of the ClusterRole.
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          status:
+            description: Status contains the permission bindings for this ClusterRole
+              across clusters
+            properties:
+              bindings:
+                description: Bindings contains the list of cluster/namespace bindings
+                  where this ClusterRole is granted
+                items:
+                  description: ClusterBinding represents a binding of the ClusterRole
+                    to a specific cluster and scope
+                  properties:
+                    cluster:
+                      description: Cluster is the name of the managed cluster (namespace
+                        name on hub)
+                      type: string
+                    namespaces:
+                      description: |-
+                        Namespaces is the list of namespaces where the binding applies
+                        If Scope is "cluster", this will contain ["*"] indicating cluster-wide access
+                        If Scope is "namespace", this will contain the specific namespace names
+                      items:
+                        type: string
+                      type: array
+                    scope:
+                      allOf:
+                      - enum:
+                        - cluster
+                        - namespace
+                      - enum:
+                        - cluster
+                        - namespace
+                      description: |-
+                        Scope indicates whether this is a cluster-wide or namespace-specific binding
+                        Possible values: "cluster" or "namespace"
+                      type: string
+                  required:
+                  - cluster
+                  - namespaces
+                  - scope
+                  type: object
+                type: array
+              clusterRoleDefinition:
+                description: |-
+                  ClusterRoleDefinition contains the complete ClusterRole definition
+                  This includes all the rules (apiGroups, resources, verbs) that define the permissions
+                properties:
+                  rules:
+                    description: Rules holds all the PolicyRules for this ClusterRole
+                    items:
+                      description: |-
+                        PolicyRule holds information that describes a policy rule, but does not contain information
+                        about who the rule applies to or which namespace the rule applies to.
+                      properties:
+                        apiGroups:
+                          description: |-
+                            APIGroups is the name of the APIGroup that contains the resources.  If multiple API groups are specified, any action requested against one of
+                            the enumerated resources in any API group will be allowed. "" represents the core API group and "*" represents all API groups.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        nonResourceURLs:
+                          description: |-
+                            NonResourceURLs is a set of partial urls that a user should have access to.  *s are allowed, but only as the full, final step in the path
+                            Since non-resource URLs are not namespaced, this field is only applicable for ClusterRoles referenced from a ClusterRoleBinding.
+                            Rules can either apply to API resources (such as "pods" or "secrets") or non-resource URL paths (such as "/api"),  but not both.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        resourceNames:
+                          description: ResourceNames is an optional white list of
+                            names that the rule applies to.  An empty set means that
+                            everything is allowed.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        resources:
+                          description: Resources is a list of resources this rule
+                            applies to. '*' represents all resources.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                        verbs:
+                          description: Verbs is a list of Verbs that apply to ALL
+                            the ResourceKinds contained in this rule. '*' represents
+                            all verbs.
+                          items:
+                            type: string
+                          type: array
+                          x-kubernetes-list-type: atomic
+                      required:
+                      - verbs
+                      type: object
+                    type: array
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

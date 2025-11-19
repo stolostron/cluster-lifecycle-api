@@ -9,7 +9,7 @@ verify="${VERIFY:-}"
 
 source "${CODEGEN_PKG}/kube_codegen.sh"
 
-for group in action view clusterinfo imageregistry klusterletconfig; do
+for group in action view clusterinfo imageregistry klusterletconfig clusterview; do
   kube::codegen::gen_client \
     --output-pkg "github.com/stolostron/cluster-lifecycle-api/client/${group}" \
     --boilerplate "${SCRIPT_ROOT}/hack/boilerplate.txt" \
