@@ -12,7 +12,8 @@ func TestEvaluateUserPermissionRule(t *testing.T) {
 	tcs := []struct {
 		name           string
 		userPermission clusterviewv1alpha1.UserPermission
-		expected       []PermissionRule
+		interestedVerb []string
+		expected       []*permissionRule
 	}{
 		{
 			name: "single rule single binding",
@@ -35,10 +36,10 @@ func TestEvaluateUserPermissionRule(t *testing.T) {
 					},
 				},
 			},
-			expected: []PermissionRule{
+			expected: []*permissionRule{
 				{
-					Cluster:    "cluster1",
-					Namespaces: []string{"default"},
+					cluster:    "cluster1",
+					namespaces: []string{"default"},
 					ResourceRule: authzv1.ResourceRule{
 						Verbs:     []string{"get", "list"},
 						APIGroups: []string{""},
@@ -72,10 +73,10 @@ func TestEvaluateUserPermissionRule(t *testing.T) {
 					},
 				},
 			},
-			expected: []PermissionRule{
+			expected: []*permissionRule{
 				{
-					Cluster:    "cluster1",
-					Namespaces: []string{"default"},
+					cluster:    "cluster1",
+					namespaces: []string{"default"},
 					ResourceRule: authzv1.ResourceRule{
 						Verbs:     []string{"get", "list"},
 						APIGroups: []string{""},
@@ -83,8 +84,8 @@ func TestEvaluateUserPermissionRule(t *testing.T) {
 					},
 				},
 				{
-					Cluster:    "cluster2",
-					Namespaces: []string{"kube-system"},
+					cluster:    "cluster2",
+					namespaces: []string{"kube-system"},
 					ResourceRule: authzv1.ResourceRule{
 						Verbs:     []string{"get", "list"},
 						APIGroups: []string{""},
@@ -119,10 +120,10 @@ func TestEvaluateUserPermissionRule(t *testing.T) {
 					},
 				},
 			},
-			expected: []PermissionRule{
+			expected: []*permissionRule{
 				{
-					Cluster:    "cluster1",
-					Namespaces: []string{"default"},
+					cluster:    "cluster1",
+					namespaces: []string{"default"},
 					ResourceRule: authzv1.ResourceRule{
 						Verbs:     []string{"get", "list"},
 						APIGroups: []string{""},
@@ -130,8 +131,8 @@ func TestEvaluateUserPermissionRule(t *testing.T) {
 					},
 				},
 				{
-					Cluster:    "cluster1",
-					Namespaces: []string{"default"},
+					cluster:    "cluster1",
+					namespaces: []string{"default"},
 					ResourceRule: authzv1.ResourceRule{
 						Verbs:     []string{"get", "list", "watch"},
 						APIGroups: []string{"apps"},
@@ -161,10 +162,10 @@ func TestEvaluateUserPermissionRule(t *testing.T) {
 					},
 				},
 			},
-			expected: []PermissionRule{
+			expected: []*permissionRule{
 				{
-					Cluster:    "cluster1",
-					Namespaces: []string{"*"},
+					cluster:    "cluster1",
+					namespaces: []string{"*"},
 					ResourceRule: authzv1.ResourceRule{
 						Verbs:     []string{"*"},
 						APIGroups: []string{"*"},
@@ -188,7 +189,7 @@ func TestEvaluateUserPermissionRule(t *testing.T) {
 					},
 				},
 			},
-			expected: []PermissionRule{},
+			expected: []*permissionRule{},
 		},
 		{
 			name: "empty bindings",
@@ -206,27 +207,119 @@ func TestEvaluateUserPermissionRule(t *testing.T) {
 					Bindings: []clusterviewv1alpha1.ClusterBinding{},
 				},
 			},
-			expected: []PermissionRule{},
+			expected: []*permissionRule{},
+		},
+		{
+			name:           "filter by interested verbs - match",
+			interestedVerb: []string{"get"},
+			userPermission: clusterviewv1alpha1.UserPermission{
+				Status: clusterviewv1alpha1.UserPermissionStatus{
+					ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+						Rules: []rbacv1.PolicyRule{
+							{
+								Verbs:     []string{"get", "list"},
+								APIGroups: []string{""},
+								Resources: []string{"pods"},
+							},
+						},
+					},
+					Bindings: []clusterviewv1alpha1.ClusterBinding{
+						{
+							Cluster:    "cluster1",
+							Namespaces: []string{"default"},
+						},
+					},
+				},
+			},
+			expected: []*permissionRule{
+				{
+					cluster:    "cluster1",
+					namespaces: []string{"default"},
+					ResourceRule: authzv1.ResourceRule{
+						Verbs:     []string{"get"},
+						APIGroups: []string{""},
+						Resources: []string{"pods"},
+					},
+				},
+			},
+		},
+		{
+			name:           "filter by interested verbs - no match",
+			interestedVerb: []string{"delete"},
+			userPermission: clusterviewv1alpha1.UserPermission{
+				Status: clusterviewv1alpha1.UserPermissionStatus{
+					ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+						Rules: []rbacv1.PolicyRule{
+							{
+								Verbs:     []string{"get", "list"},
+								APIGroups: []string{""},
+								Resources: []string{"pods"},
+							},
+						},
+					},
+					Bindings: []clusterviewv1alpha1.ClusterBinding{
+						{
+							Cluster:    "cluster1",
+							Namespaces: []string{"default"},
+						},
+					},
+				},
+			},
+			expected: []*permissionRule{},
+		},
+		{
+			name:           "wildcard verbs with interested verbs",
+			interestedVerb: []string{"get"},
+			userPermission: clusterviewv1alpha1.UserPermission{
+				Status: clusterviewv1alpha1.UserPermissionStatus{
+					ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+						Rules: []rbacv1.PolicyRule{
+							{
+								Verbs:     []string{"*"},
+								APIGroups: []string{""},
+								Resources: []string{"pods"},
+							},
+						},
+					},
+					Bindings: []clusterviewv1alpha1.ClusterBinding{
+						{
+							Cluster:    "cluster1",
+							Namespaces: []string{"default"},
+						},
+					},
+				},
+			},
+			expected: []*permissionRule{
+				{
+					cluster:    "cluster1",
+					namespaces: []string{"default"},
+					ResourceRule: authzv1.ResourceRule{
+						Verbs:     []string{"*"},
+						APIGroups: []string{""},
+						Resources: []string{"pods"},
+					},
+				},
+			},
 		},
 	}
 
 	for _, tc := range tcs {
 		t.Run(tc.name, func(t *testing.T) {
-			result := evaluateUserPermissionRule(tc.userPermission)
+			result := evaluateUserPermissionRule(tc.userPermission, tc.interestedVerb...)
 			if len(result) != len(tc.expected) {
 				t.Errorf("expected %d permission rules, got %d", len(tc.expected), len(result))
 				return
 			}
 			for i, rule := range result {
-				if rule.Cluster != tc.expected[i].Cluster {
-					t.Errorf("expected cluster %s, got %s", tc.expected[i].Cluster, rule.Cluster)
+				if rule.cluster != tc.expected[i].cluster {
+					t.Errorf("expected cluster %s, got %s", tc.expected[i].cluster, rule.cluster)
 				}
-				if len(rule.Namespaces) != len(tc.expected[i].Namespaces) {
-					t.Errorf("expected %d namespaces, got %d", len(tc.expected[i].Namespaces), len(rule.Namespaces))
+				if len(rule.namespaces) != len(tc.expected[i].namespaces) {
+					t.Errorf("expected %d namespaces, got %d", len(tc.expected[i].namespaces), len(rule.namespaces))
 				}
-				for j, ns := range rule.Namespaces {
-					if ns != tc.expected[i].Namespaces[j] {
-						t.Errorf("expected namespace %s, got %s", tc.expected[i].Namespaces[j], ns)
+				for j, ns := range rule.namespaces {
+					if ns != tc.expected[i].namespaces[j] {
+						t.Errorf("expected namespace %s, got %s", tc.expected[i].namespaces[j], ns)
 					}
 				}
 				if len(rule.Verbs) != len(tc.expected[i].Verbs) {
@@ -246,17 +339,17 @@ func TestEvaluateUserPermissionRule(t *testing.T) {
 func TestInternalPermissionCache_Add(t *testing.T) {
 	tcs := []struct {
 		name     string
-		initial  map[string][]PermissionRule
-		toAdd    []PermissionRule
-		expected map[string][]PermissionRule
+		initial  map[string][]*permissionRule
+		toAdd    []*permissionRule
+		expected map[string][]*permissionRule
 	}{
 		{
 			name:    "add to empty cache",
-			initial: map[string][]PermissionRule{},
-			toAdd: []PermissionRule{
+			initial: map[string][]*permissionRule{},
+			toAdd: []*permissionRule{
 				{
-					Cluster:    "cluster1",
-					Namespaces: []string{"default"},
+					cluster:    "cluster1",
+					namespaces: []string{"default"},
 					ResourceRule: authzv1.ResourceRule{
 						Verbs:     []string{"get", "list"},
 						APIGroups: []string{""},
@@ -264,11 +357,11 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 					},
 				},
 			},
-			expected: map[string][]PermissionRule{
+			expected: map[string][]*permissionRule{
 				"cluster1": {
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"default"},
+						cluster:    "cluster1",
+						namespaces: []string{"default"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"get", "list"},
 							APIGroups: []string{""},
@@ -280,11 +373,11 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 		},
 		{
 			name: "add to existing cluster",
-			initial: map[string][]PermissionRule{
+			initial: map[string][]*permissionRule{
 				"cluster1": {
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"default"},
+						cluster:    "cluster1",
+						namespaces: []string{"default"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"get"},
 							APIGroups: []string{""},
@@ -293,10 +386,10 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 					},
 				},
 			},
-			toAdd: []PermissionRule{
+			toAdd: []*permissionRule{
 				{
-					Cluster:    "cluster1",
-					Namespaces: []string{"kube-system"},
+					cluster:    "cluster1",
+					namespaces: []string{"kube-system"},
 					ResourceRule: authzv1.ResourceRule{
 						Verbs:     []string{"list"},
 						APIGroups: []string{"apps"},
@@ -304,11 +397,11 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 					},
 				},
 			},
-			expected: map[string][]PermissionRule{
+			expected: map[string][]*permissionRule{
 				"cluster1": {
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"default"},
+						cluster:    "cluster1",
+						namespaces: []string{"default"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"get"},
 							APIGroups: []string{""},
@@ -316,8 +409,8 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 						},
 					},
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"kube-system"},
+						cluster:    "cluster1",
+						namespaces: []string{"kube-system"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"list"},
 							APIGroups: []string{"apps"},
@@ -329,11 +422,11 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 		},
 		{
 			name: "add admin rule overrides existing",
-			initial: map[string][]PermissionRule{
+			initial: map[string][]*permissionRule{
 				"cluster1": {
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"default"},
+						cluster:    "cluster1",
+						namespaces: []string{"default"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"get"},
 							APIGroups: []string{""},
@@ -342,10 +435,10 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 					},
 				},
 			},
-			toAdd: []PermissionRule{
+			toAdd: []*permissionRule{
 				{
-					Cluster:    "cluster1",
-					Namespaces: []string{"*"},
+					cluster:    "cluster1",
+					namespaces: []string{"*"},
 					ResourceRule: authzv1.ResourceRule{
 						Verbs:     []string{"*"},
 						APIGroups: []string{"*"},
@@ -353,11 +446,11 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 					},
 				},
 			},
-			expected: map[string][]PermissionRule{
+			expected: map[string][]*permissionRule{
 				"cluster1": {
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"*"},
+						cluster:    "cluster1",
+						namespaces: []string{"*"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"*"},
 							APIGroups: []string{"*"},
@@ -369,11 +462,11 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 		},
 		{
 			name: "add to different clusters",
-			initial: map[string][]PermissionRule{
+			initial: map[string][]*permissionRule{
 				"cluster1": {
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"default"},
+						cluster:    "cluster1",
+						namespaces: []string{"default"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"get"},
 							APIGroups: []string{""},
@@ -382,10 +475,10 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 					},
 				},
 			},
-			toAdd: []PermissionRule{
+			toAdd: []*permissionRule{
 				{
-					Cluster:    "cluster2",
-					Namespaces: []string{"kube-system"},
+					cluster:    "cluster2",
+					namespaces: []string{"kube-system"},
 					ResourceRule: authzv1.ResourceRule{
 						Verbs:     []string{"list"},
 						APIGroups: []string{"apps"},
@@ -393,11 +486,11 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 					},
 				},
 			},
-			expected: map[string][]PermissionRule{
+			expected: map[string][]*permissionRule{
 				"cluster1": {
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"default"},
+						cluster:    "cluster1",
+						namespaces: []string{"default"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"get"},
 							APIGroups: []string{""},
@@ -407,12 +500,52 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 				},
 				"cluster2": {
 					{
-						Cluster:    "cluster2",
-						Namespaces: []string{"kube-system"},
+						cluster:    "cluster2",
+						namespaces: []string{"kube-system"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"list"},
 							APIGroups: []string{"apps"},
 							Resources: []string{"deployments"},
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "merge same resource rules with different namespaces",
+			initial: map[string][]*permissionRule{
+				"cluster1": {
+					{
+						cluster:    "cluster1",
+						namespaces: []string{"default"},
+						ResourceRule: authzv1.ResourceRule{
+							Verbs:     []string{"get", "list"},
+							APIGroups: []string{""},
+							Resources: []string{"pods"},
+						},
+					},
+				},
+			},
+			toAdd: []*permissionRule{
+				{
+					cluster:    "cluster1",
+					namespaces: []string{"kube-system"},
+					ResourceRule: authzv1.ResourceRule{
+						Verbs:     []string{"get", "list"},
+						APIGroups: []string{""},
+						Resources: []string{"pods"},
+					},
+				},
+			},
+			expected: map[string][]*permissionRule{
+				"cluster1": {
+					{
+						cluster:    "cluster1",
+						namespaces: []string{"default", "kube-system"},
+						ResourceRule: authzv1.ResourceRule{
+							Verbs:     []string{"get", "list"},
+							APIGroups: []string{""},
+							Resources: []string{"pods"},
 						},
 					},
 				},
@@ -445,24 +578,344 @@ func TestInternalPermissionCache_Add(t *testing.T) {
 	}
 }
 
-func TestInternalPermissionCache_List(t *testing.T) {
+func TestEvaluateUserPermissionRule_WithConsolidation(t *testing.T) {
+	tcs := []struct {
+		name            string
+		userPermissions []clusterviewv1alpha1.UserPermission
+		expected        []PermissionRule
+	}{
+		{
+			name: "same resource rule across multiple clusters - should consolidate",
+			userPermissions: []clusterviewv1alpha1.UserPermission{
+				{
+					Status: clusterviewv1alpha1.UserPermissionStatus{
+						ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+							Rules: []rbacv1.PolicyRule{
+								{
+									Verbs:     []string{"get", "list"},
+									APIGroups: []string{""},
+									Resources: []string{"pods"},
+								},
+							},
+						},
+						Bindings: []clusterviewv1alpha1.ClusterBinding{
+							{
+								Cluster:    "cluster1",
+								Namespaces: []string{"default"},
+							},
+							{
+								Cluster:    "cluster2",
+								Namespaces: []string{"default"},
+							},
+						},
+					},
+				},
+			},
+			expected: []PermissionRule{
+				{
+					Clusters:   []string{"cluster1", "cluster2"},
+					Namespaces: []string{"default"},
+					ResourceRule: authzv1.ResourceRule{
+						Verbs:     []string{"get", "list"},
+						APIGroups: []string{""},
+						Resources: []string{"pods"},
+					},
+				},
+			},
+		},
+		{
+			name: "multiple rules with different namespaces - separate consolidation",
+			userPermissions: []clusterviewv1alpha1.UserPermission{
+				{
+					Status: clusterviewv1alpha1.UserPermissionStatus{
+						ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+							Rules: []rbacv1.PolicyRule{
+								{
+									Verbs:     []string{"get"},
+									APIGroups: []string{"apps"},
+									Resources: []string{"deployments"},
+								},
+								{
+									Verbs:     []string{"list"},
+									APIGroups: []string{""},
+									Resources: []string{"services"},
+								},
+							},
+						},
+						Bindings: []clusterviewv1alpha1.ClusterBinding{
+							{
+								Cluster:    "cluster1",
+								Namespaces: []string{"default"},
+							},
+							{
+								Cluster:    "cluster2",
+								Namespaces: []string{"default"},
+							},
+						},
+					},
+				},
+			},
+			expected: []PermissionRule{
+				{
+					Clusters:   []string{"cluster1", "cluster2"},
+					Namespaces: []string{"default"},
+					ResourceRule: authzv1.ResourceRule{
+						Verbs:     []string{"get"},
+						APIGroups: []string{"apps"},
+						Resources: []string{"deployments"},
+					},
+				},
+				{
+					Clusters:   []string{"cluster1", "cluster2"},
+					Namespaces: []string{"default"},
+					ResourceRule: authzv1.ResourceRule{
+						Verbs:     []string{"list"},
+						APIGroups: []string{""},
+						Resources: []string{"services"},
+					},
+				},
+			},
+		},
+		{
+			name: "multiple UserPermissions - consolidate across them",
+			userPermissions: []clusterviewv1alpha1.UserPermission{
+				{
+					Status: clusterviewv1alpha1.UserPermissionStatus{
+						ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+							Rules: []rbacv1.PolicyRule{
+								{
+									Verbs:     []string{"get"},
+									APIGroups: []string{""},
+									Resources: []string{"pods"},
+								},
+							},
+						},
+						Bindings: []clusterviewv1alpha1.ClusterBinding{
+							{
+								Cluster:    "cluster1",
+								Namespaces: []string{"default"},
+							},
+						},
+					},
+				},
+				{
+					Status: clusterviewv1alpha1.UserPermissionStatus{
+						ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+							Rules: []rbacv1.PolicyRule{
+								{
+									Verbs:     []string{"get"},
+									APIGroups: []string{""},
+									Resources: []string{"pods"},
+								},
+							},
+						},
+						Bindings: []clusterviewv1alpha1.ClusterBinding{
+							{
+								Cluster:    "cluster2",
+								Namespaces: []string{"default"},
+							},
+						},
+					},
+				},
+			},
+			expected: []PermissionRule{
+				{
+					Clusters:   []string{"cluster1", "cluster2"},
+					Namespaces: []string{"default"},
+					ResourceRule: authzv1.ResourceRule{
+						Verbs:     []string{"get"},
+						APIGroups: []string{""},
+						Resources: []string{"pods"},
+					},
+				},
+			},
+		},
+		{
+			name: "multiple UserPermissions with namespace merging within cluster",
+			userPermissions: []clusterviewv1alpha1.UserPermission{
+				{
+					Status: clusterviewv1alpha1.UserPermissionStatus{
+						ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+							Rules: []rbacv1.PolicyRule{
+								{
+									Verbs:     []string{"get"},
+									APIGroups: []string{""},
+									Resources: []string{"pods"},
+								},
+							},
+						},
+						Bindings: []clusterviewv1alpha1.ClusterBinding{
+							{
+								Cluster:    "cluster1",
+								Namespaces: []string{"default"},
+							},
+						},
+					},
+				},
+				{
+					Status: clusterviewv1alpha1.UserPermissionStatus{
+						ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+							Rules: []rbacv1.PolicyRule{
+								{
+									Verbs:     []string{"get"},
+									APIGroups: []string{""},
+									Resources: []string{"pods"},
+								},
+							},
+						},
+						Bindings: []clusterviewv1alpha1.ClusterBinding{
+							{
+								Cluster:    "cluster1",
+								Namespaces: []string{"kube-system"},
+							},
+						},
+					},
+				},
+			},
+			expected: []PermissionRule{
+				{
+					Clusters:   []string{"cluster1"},
+					Namespaces: []string{"default", "kube-system"},
+					ResourceRule: authzv1.ResourceRule{
+						Verbs:     []string{"get"},
+						APIGroups: []string{""},
+						Resources: []string{"pods"},
+					},
+				},
+			},
+		},
+		{
+			name: "multiple UserPermissions with admin override",
+			userPermissions: []clusterviewv1alpha1.UserPermission{
+				{
+					Status: clusterviewv1alpha1.UserPermissionStatus{
+						ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+							Rules: []rbacv1.PolicyRule{
+								{
+									Verbs:     []string{"get"},
+									APIGroups: []string{""},
+									Resources: []string{"pods"},
+								},
+							},
+						},
+						Bindings: []clusterviewv1alpha1.ClusterBinding{
+							{
+								Cluster:    "cluster1",
+								Namespaces: []string{"default"},
+							},
+						},
+					},
+				},
+				{
+					Status: clusterviewv1alpha1.UserPermissionStatus{
+						ClusterRoleDefinition: clusterviewv1alpha1.ClusterRoleDefinition{
+							Rules: []rbacv1.PolicyRule{
+								{
+									Verbs:     []string{"*"},
+									APIGroups: []string{"*"},
+									Resources: []string{"*"},
+								},
+							},
+						},
+						Bindings: []clusterviewv1alpha1.ClusterBinding{
+							{
+								Cluster:    "cluster1",
+								Namespaces: []string{"*"},
+							},
+						},
+					},
+				},
+			},
+			expected: []PermissionRule{
+				{
+					Clusters:   []string{"cluster1"},
+					Namespaces: []string{"*"},
+					ResourceRule: authzv1.ResourceRule{
+						Verbs:     []string{"*"},
+						APIGroups: []string{"*"},
+						Resources: []string{"*"},
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range tcs {
+		t.Run(tc.name, func(t *testing.T) {
+			// Use the cache to test consolidation
+			cache := &internalPermissionCache{
+				rulesMap: make(map[string][]*permissionRule),
+			}
+			// Process all UserPermissions
+			for _, userPermission := range tc.userPermissions {
+				permissionRules := evaluateUserPermissionRule(userPermission)
+				cache.add(permissionRules...)
+			}
+			result := cache.consolidateList()
+
+			if len(result) != len(tc.expected) {
+				t.Errorf("expected %d consolidated rules, got %d", len(tc.expected), len(result))
+				return
+			}
+
+			// Since map iteration order is not guaranteed, we need to match rules by their content
+			for _, expectedRule := range tc.expected {
+				found := false
+				for _, actualRule := range result {
+					if len(actualRule.Verbs) == len(expectedRule.Verbs) &&
+						len(actualRule.APIGroups) == len(expectedRule.APIGroups) &&
+						len(actualRule.Resources) == len(expectedRule.Resources) &&
+						len(actualRule.Namespaces) == len(expectedRule.Namespaces) {
+						// Check if clusters match (order may differ)
+						if len(actualRule.Clusters) == len(expectedRule.Clusters) {
+							clustersMatch := true
+							for _, ec := range expectedRule.Clusters {
+								clusterFound := false
+								for _, ac := range actualRule.Clusters {
+									if ec == ac {
+										clusterFound = true
+										break
+									}
+								}
+								if !clusterFound {
+									clustersMatch = false
+									break
+								}
+							}
+							if clustersMatch {
+								found = true
+								break
+							}
+						}
+					}
+				}
+				if !found {
+					t.Errorf("expected rule not found in results: %+v", expectedRule)
+				}
+			}
+		})
+	}
+}
+
+func TestInternalPermissionCache_ConsolidateList(t *testing.T) {
 	tcs := []struct {
 		name        string
-		rulesMap    map[string][]PermissionRule
+		rulesMap    map[string][]*permissionRule
 		expectedLen int
+		validate    func(t *testing.T, result []PermissionRule)
 	}{
 		{
 			name:        "empty cache",
-			rulesMap:    map[string][]PermissionRule{},
+			rulesMap:    map[string][]*permissionRule{},
 			expectedLen: 0,
 		},
 		{
 			name: "single cluster single rule",
-			rulesMap: map[string][]PermissionRule{
+			rulesMap: map[string][]*permissionRule{
 				"cluster1": {
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"default"},
+						cluster:    "cluster1",
+						namespaces: []string{"default"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"get"},
 							APIGroups: []string{""},
@@ -472,14 +925,19 @@ func TestInternalPermissionCache_List(t *testing.T) {
 				},
 			},
 			expectedLen: 1,
+			validate: func(t *testing.T, result []PermissionRule) {
+				if len(result[0].Clusters) != 1 || result[0].Clusters[0] != "cluster1" {
+					t.Errorf("expected clusters [cluster1], got %v", result[0].Clusters)
+				}
+			},
 		},
 		{
 			name: "single cluster multiple rules",
-			rulesMap: map[string][]PermissionRule{
+			rulesMap: map[string][]*permissionRule{
 				"cluster1": {
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"default"},
+						cluster:    "cluster1",
+						namespaces: []string{"default"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"get"},
 							APIGroups: []string{""},
@@ -487,8 +945,8 @@ func TestInternalPermissionCache_List(t *testing.T) {
 						},
 					},
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"kube-system"},
+						cluster:    "cluster1",
+						namespaces: []string{"kube-system"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"list"},
 							APIGroups: []string{"apps"},
@@ -500,12 +958,12 @@ func TestInternalPermissionCache_List(t *testing.T) {
 			expectedLen: 2,
 		},
 		{
-			name: "multiple clusters",
-			rulesMap: map[string][]PermissionRule{
+			name: "multiple clusters with same rule - should consolidate",
+			rulesMap: map[string][]*permissionRule{
 				"cluster1": {
 					{
-						Cluster:    "cluster1",
-						Namespaces: []string{"default"},
+						cluster:    "cluster1",
+						namespaces: []string{"default"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"get"},
 							APIGroups: []string{""},
@@ -515,8 +973,8 @@ func TestInternalPermissionCache_List(t *testing.T) {
 				},
 				"cluster2": {
 					{
-						Cluster:    "cluster2",
-						Namespaces: []string{"default"},
+						cluster:    "cluster2",
+						namespaces: []string{"default"},
 						ResourceRule: authzv1.ResourceRule{
 							Verbs:     []string{"get"},
 							APIGroups: []string{""},
@@ -525,7 +983,15 @@ func TestInternalPermissionCache_List(t *testing.T) {
 					},
 				},
 			},
-			expectedLen: 2,
+			expectedLen: 1,
+			validate: func(t *testing.T, result []PermissionRule) {
+				if len(result) == 0 {
+					t.Fatal("expected at least one result")
+				}
+				if len(result[0].Clusters) != 2 {
+					t.Errorf("expected 2 clusters to be consolidated, got %d: %v", len(result[0].Clusters), result[0].Clusters)
+				}
+			},
 		},
 	}
 
@@ -534,9 +1000,12 @@ func TestInternalPermissionCache_List(t *testing.T) {
 			cache := &internalPermissionCache{
 				rulesMap: tc.rulesMap,
 			}
-			result := cache.list()
+			result := cache.consolidateList()
 			if len(result) != tc.expectedLen {
 				t.Errorf("expected %d rules, got %d", tc.expectedLen, len(result))
+			}
+			if tc.validate != nil {
+				tc.validate(t, result)
 			}
 		})
 	}
