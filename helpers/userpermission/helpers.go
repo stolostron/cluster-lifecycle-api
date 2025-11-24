@@ -2,10 +2,15 @@ package userpermission
 
 import (
 	"context"
+	"encoding/json"
+	"fmt"
 	clusterviewclientset "github.com/stolostron/cluster-lifecycle-api/client/clusterview/clientset/versioned"
 	clusterviewv1alpha1 "github.com/stolostron/cluster-lifecycle-api/clusterview/v1alpha1"
+	"hash/fnv"
 	"k8s.io/apimachinery/pkg/api/equality"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/util/sets"
+	"slices"
 
 	authzv1 "k8s.io/api/authorization/v1"
 	"k8s.io/client-go/rest"
@@ -17,9 +22,34 @@ var adminResourceRule = authzv1.ResourceRule{
 	Resources: []string{"*"},
 }
 
+// internal cache to keep permissionRule
+type permissionRule struct {
+	authzv1.ResourceRule
+	cluster    string   `json:"clusters"`
+	namespaces []string `json:"namespaces"`
+}
+
+func newPermissionRule(cluster string, namespaces []string, resourceRule authzv1.ResourceRule) *permissionRule {
+	return &permissionRule{
+		ResourceRule: resourceRule,
+		cluster:      cluster,
+		namespaces:   namespaces,
+	}
+}
+
+func (p *permissionRule) key() string {
+	shallow := *p
+	shallow.cluster = ""
+	data, _ := json.Marshal(shallow)
+	h := fnv.New128a()
+	h.Write(data)
+	var sum [16]byte
+	return fmt.Sprintf("%x", h.Sum(sum[:0]))
+}
+
 type PermissionRule struct {
 	authzv1.ResourceRule
-	Cluster    string   `json:"cluster"`
+	Clusters   []string `json:"clusters"`
 	Namespaces []string `json:"namespaces"`
 }
 
@@ -27,43 +57,75 @@ type PermissionRule struct {
 // permission rules are ignored.
 type internalPermissionCache struct {
 	// keeps a map of rules, the key is clusterName
-	rulesMap map[string][]PermissionRule
+	rulesMap map[string][]*permissionRule
 }
 
-func (i *internalPermissionCache) add(rules ...PermissionRule) {
+func (i *internalPermissionCache) add(rules ...*permissionRule) {
 	for _, rule := range rules {
-		existing, ok := i.rulesMap[rule.Cluster]
+		existing, ok := i.rulesMap[rule.cluster]
 		if !ok {
-			i.rulesMap[rule.Cluster] = []PermissionRule{rule}
-			continue
-		}
-
-		// if existing rule is admin, skip any update since it is highest permission
-		if equality.Semantic.DeepEqual(existing, adminResourceRule) {
+			i.rulesMap[rule.cluster] = []*permissionRule{rule}
 			continue
 		}
 
 		// if newly added rule is admin, override all the existing
 		if equality.Semantic.DeepEqual(rule.ResourceRule, adminResourceRule) {
-			i.rulesMap[rule.Cluster] = []PermissionRule{rule}
+			i.rulesMap[rule.cluster] = []*permissionRule{rule}
 			continue
 		}
-		i.rulesMap[rule.Cluster] = append(existing, rule)
+
+		var skipAdd bool
+		for idx, existingRule := range existing {
+			// if existing rule is admin, skip any update since it is the highest permission
+			if equality.Semantic.DeepEqual(existingRule.ResourceRule, adminResourceRule) {
+				skipAdd = true
+				continue
+			}
+
+			// if resourceRule are the same, merge the namespace
+			if equality.Semantic.DeepEqual(existingRule.ResourceRule, rule.ResourceRule) {
+				namespaces := append(existingRule.namespaces, rule.namespaces...)
+				i.rulesMap[rule.cluster][idx].namespaces = slices.Compact(namespaces)
+				skipAdd = true
+			}
+		}
+
+		if !skipAdd {
+			i.rulesMap[rule.cluster] = append(existing, rule)
+		}
 	}
 }
 
-func (i *internalPermissionCache) list() []PermissionRule {
-	var rules []PermissionRule
+// consolidate all rules and return
+func (i *internalPermissionCache) consolidateList() []PermissionRule {
+	conslidatedMap := map[string]PermissionRule{}
+
 	for _, clusterRules := range i.rulesMap {
 		for _, rule := range clusterRules {
-			rules = append(rules, rule)
+			// if two rules has the same namespaces and resourceRules, merge them to one.
+			existing, ok := conslidatedMap[rule.key()]
+			if !ok {
+				conslidatedMap[rule.key()] = PermissionRule{
+					ResourceRule: rule.ResourceRule,
+					Clusters:     []string{rule.cluster},
+					Namespaces:   rule.namespaces,
+				}
+			} else {
+				existing.Clusters = append(existing.Clusters, rule.cluster)
+				conslidatedMap[rule.key()] = existing
+			}
 		}
 	}
-	return rules
+
+	conslidatedList := []PermissionRule{}
+	for _, rule := range conslidatedMap {
+		conslidatedList = append(conslidatedList, rule)
+	}
+	return conslidatedList
 }
 
 // config needs to be the user's config to evaluate
-func GetSelfPermissionRules(ctx context.Context, config *rest.Config) ([]PermissionRule, error) {
+func GetSelfPermissionRules(ctx context.Context, config *rest.Config, interestedVerb ...string) ([]PermissionRule, error) {
 	clusterViewClient, err := clusterviewclientset.NewForConfig(config)
 	if err != nil {
 		return nil, err
@@ -75,31 +137,45 @@ func GetSelfPermissionRules(ctx context.Context, config *rest.Config) ([]Permiss
 	}
 
 	cache := &internalPermissionCache{
-		rulesMap: make(map[string][]PermissionRule),
+		rulesMap: make(map[string][]*permissionRule),
 	}
 	for _, userPermission := range userPermissions.Items {
-		permissionRules := evaluateUserPermissionRule(userPermission)
+		permissionRules := evaluateUserPermissionRule(userPermission, interestedVerb...)
 		cache.add(permissionRules...)
 	}
-	return cache.list(), nil
+	return cache.consolidateList(), nil
 }
 
-func evaluateUserPermissionRule(userPermission clusterviewv1alpha1.UserPermission) []PermissionRule {
-	var permissionRules []PermissionRule
+func evaluateUserPermissionRule(userPermission clusterviewv1alpha1.UserPermission, interestedVerb ...string) []*permissionRule {
+	var permissionRules []*permissionRule
 
 	for _, rule := range userPermission.Status.ClusterRoleDefinition.Rules {
+		// we conly care about * and filtered verbs
+		haveSet := sets.New[string](rule.Verbs...)
+
+		// If verbs in rule include "*", the output verb is "*"
+		// If there are interested verbs, only return rules that has interested verbs included
+		// return all verbs in the rule otherwise.
+		var verbs []string
+		if haveSet.HasAll("*") {
+			verbs = rule.Verbs
+		} else if len(interestedVerb) > 0 {
+			if !haveSet.HasAll(interestedVerb...) {
+				continue
+			}
+			verbs = interestedVerb
+		} else {
+			verbs = rule.Verbs
+		}
+
 		resourceRule := authzv1.ResourceRule{
-			Verbs:     rule.Verbs,
+			Verbs:     verbs,
 			APIGroups: rule.APIGroups,
 			Resources: rule.Resources,
 		}
 		for _, binding := range userPermission.Status.Bindings {
-			permissionRule := PermissionRule{
-				Cluster:      binding.Cluster,
-				Namespaces:   binding.Namespaces,
-				ResourceRule: resourceRule,
-			}
-			permissionRules = append(permissionRules, permissionRule)
+			p := newPermissionRule(binding.Cluster, binding.Namespaces, resourceRule)
+			permissionRules = append(permissionRules, p)
 		}
 	}
 	return permissionRules
