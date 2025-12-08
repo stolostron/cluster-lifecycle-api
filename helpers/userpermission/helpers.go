@@ -124,7 +124,33 @@ func (i *internalPermissionCache) consolidateList() []PermissionRule {
 	return conslidatedList
 }
 
-// config needs to be the user's config to evaluate
+// GetSelfPermissionRules retrieves and consolidates permission rules for the authenticated user across multiple clusters.
+//
+// This function queries all UserPermission resources accessible by the authenticated user and consolidates them into
+// a list of PermissionRule objects. Each PermissionRule represents a set of RBAC permissions (verbs, API groups, resources)
+// that apply to one or more clusters and namespaces.
+//
+// The consolidation process:
+//   - Groups identical resource rules across multiple clusters into a single PermissionRule entry
+//   - Merges namespace lists when the same resource rule exists within a single cluster
+//   - Handles admin permissions (Verbs:*, APIGroups:*, Resources:*) specially by overriding other permissions for that cluster
+//   - Filters rules by interested verbs if specified
+//
+// Parameters:
+//   - ctx: Context for the API request
+//   - config: Kubernetes REST config for the authenticated user whose permissions should be evaluated.
+//     This must be the user's config, not a service account or admin config.
+//   - interestedVerb: Optional list of verbs to filter by (e.g., "get", "list", "create").
+//     If provided, only rules containing ALL specified verbs will be returned.
+//     If the rule has wildcard verbs ("*"), it will always be included regardless of this filter.
+//     If not provided, all permission rules are returned.
+//
+// Returns:
+//   - []PermissionRule: A consolidated list of permission rules. Each rule contains:
+//   - ResourceRule: The RBAC resource rule (Verbs, APIGroups, Resources)
+//   - Clusters: List of cluster names where this rule applies
+//   - Namespaces: List of namespaces where this rule applies (may include "*" for cluster-scoped)
+//   - error: Any error encountered during the retrieval or processing
 func GetSelfPermissionRules(ctx context.Context, config *rest.Config, interestedVerb ...string) ([]PermissionRule, error) {
 	clusterViewClient, err := clusterviewclientset.NewForConfig(config)
 	if err != nil {
