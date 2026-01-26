@@ -36,10 +36,6 @@ func newAnnotationRegistries(registries []v1alpha1.Registries, namespacePullSecr
 
 func newPullSecret(namespace, name string) *corev1.Secret {
 	return &corev1.Secret{
-		TypeMeta: metav1.TypeMeta{
-			Kind:       "Secret",
-			APIVersion: "v1",
-		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
