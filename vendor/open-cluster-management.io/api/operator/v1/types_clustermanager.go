@@ -30,48 +30,52 @@ type ClusterManager struct {
 
 // ClusterManagerSpec represents a desired deployment configuration of controllers that govern registration and work distribution for attached Klusterlets.
 type ClusterManagerSpec struct {
-	// RegistrationImagePullSpec represents the desired image of registration controller/webhook installed on hub.
+	// registrationImagePullSpec represents the desired image of registration controller/webhook installed on hub.
 	// +optional
 	// +kubebuilder:default=quay.io/open-cluster-management/registration
 	RegistrationImagePullSpec string `json:"registrationImagePullSpec,omitempty"`
 
-	// WorkImagePullSpec represents the desired image configuration of work controller/webhook installed on hub.
+	// workImagePullSpec represents the desired image configuration of work controller/webhook installed on hub.
 	// +optional
 	// +kubebuilder:default=quay.io/open-cluster-management/work
 	WorkImagePullSpec string `json:"workImagePullSpec,omitempty"`
 
-	// PlacementImagePullSpec represents the desired image configuration of placement controller/webhook installed on hub.
+	// placementImagePullSpec represents the desired image configuration of placement controller/webhook installed on hub.
 	// +optional
 	// +kubebuilder:default=quay.io/open-cluster-management/placement
 	PlacementImagePullSpec string `json:"placementImagePullSpec,omitempty"`
 
-	// AddOnManagerImagePullSpec represents the desired image configuration of addon manager controller/webhook installed on hub.
+	// addOnManagerImagePullSpec represents the desired image configuration of addon manager controller/webhook installed on hub.
 	// +optional
 	// +kubebuilder:default=quay.io/open-cluster-management/addon-manager
 	AddOnManagerImagePullSpec string `json:"addOnManagerImagePullSpec,omitempty"`
 
-	// NodePlacement enables explicit control over the scheduling of the deployed pods.
+	// nodePlacement enables explicit control over the scheduling of the deployed pods.
 	// +optional
 	NodePlacement NodePlacement `json:"nodePlacement,omitempty"`
 
-	// DeployOption contains the options of deploying a cluster-manager
+	// deployOption contains the options of deploying a cluster-manager
 	// Default mode is used if DeployOption is not set.
 	// +optional
 	// +kubebuilder:default={mode: Default}
 	DeployOption ClusterManagerDeployOption `json:"deployOption,omitempty"`
 
-	// RegistrationConfiguration contains the configuration of registration
+	// registrationConfiguration contains the configuration of registration
 	// +optional
 	RegistrationConfiguration *RegistrationHubConfiguration `json:"registrationConfiguration,omitempty"`
 
-	// WorkConfiguration contains the configuration of work
+	// workConfiguration contains the configuration of work
 	// +optional
 	// +kubebuilder:default={workDriver: kube}
 	WorkConfiguration *WorkConfiguration `json:"workConfiguration,omitempty"`
 
-	// AddOnManagerConfiguration contains the configuration of addon manager
+	// addOnManagerConfiguration contains the configuration of addon manager
 	// +optional
 	AddOnManagerConfiguration *AddOnManagerConfiguration `json:"addOnManagerConfiguration,omitempty"`
+
+	// serverConfiguration contains the configuration for http/grpc server.
+	// +optional
+	ServerConfiguration *ServerConfiguration `json:"serverConfiguration,omitempty"`
 
 	// ResourceRequirement specify QoS classes of deployments managed by clustermanager.
 	// It applies to all the containers in the deployments.
@@ -116,6 +120,17 @@ type RegistrationHubConfiguration struct {
 	// +listType=map
 	// +listMapKey=authType
 	RegistrationDrivers []RegistrationDriverHub `json:"registrationDrivers,omitempty"`
+
+	// ImporterConfiguration represents the configuration of the cluster importer
+	// +optional
+	ImporterConfiguration *ImporterConfiguration `json:"importerConfiguration,omitempty"`
+}
+
+type ImporterConfiguration struct {
+	// renderers specifies which import renderers to use.
+	// Valid values are: "render-auto", "render-from-config-secret"
+	// +optional
+	Renderers []string `json:"renderers,omitempty"`
 }
 
 const (
@@ -139,67 +154,123 @@ const (
 
 type RegistrationDriverHub struct {
 
-	// Type of the authentication used by hub to initialize the Hub cluster. Possible values are csr and awsirsa.
+	// authType is the type of the authentication used by hub to initialize the Hub cluster.
+	// Possible values are csr, awsirsa and grpc.
 	// +required
 	// +kubebuilder:default:=csr
 	// +kubebuilder:validation:Enum=csr;awsirsa;grpc
 	AuthType string `json:"authType,omitempty"`
 
-	// CSR represents the configuration for csr driver.
+	// csr represents the configuration for csr driver.
 	// +optional
 	CSR *CSRConfig `json:"csr,omitempty"`
 
-	// AwsIrsa represents the configuration for awsirsa driver.
+	// awsirsa represents the configuration for awsirsa driver.
 	// +optional
 	AwsIrsa *AwsIrsaConfig `json:"awsirsa,omitempty"`
 
-	// GRPC represents the configuration for gRPC driver.
+	// grpc represents the configuration for gRPC driver.
 	// +optional
-	GRPC *GRPCConfig `json:"grpc,omitempty"`
+	GRPC *GRPCRegistrationConfig `json:"grpc,omitempty"`
 }
 
-// GRPC represents the configuration for gRPC driver.
-type GRPCConfig struct {
-	// ImagePullSpec represents the desired image of the gRPC broker installed on hub.
-	// +optional
-	// +kubebuilder:default=quay.io/open-cluster-management/registration
+type ServerConfiguration struct {
+	// imagePullSpec is the image for the server
 	ImagePullSpec string `json:"imagePullSpec,omitempty"`
 
-	// EndpointExposure represents the configuration for endpoint exposure.
-	// +optional
-	EndpointExposure *GRPCEndpointExposure `json:"endpointExposure,omitempty"`
+	// featureGates represents the features enabled for the server
+	FeatureGates []FeatureGate `json:"featureGates,omitempty"`
 
-	// AutoApprovedIdentities represent a list of approved users
+	// endpointsExposure represents the configuration for endpoints exposure of the server.
 	// +optional
-	AutoApprovedIdentities []string `json:"autoApprovedIdentities,omitempty"`
+	EndpointsExposure []EndpointExposure `json:"endpointsExposure,omitempty"`
 }
 
-type GRPCEndpointExposure struct {
-	// Type specifies how the gRPC endpoint is exposed.
-	// You may need to apply an object to expose the gRPC endpoint, for example: a route.
-	// TODO: support loadbalancer.
-	// +kubebuilder:default:=hostname
-	// +kubebuilder:validation:Enum=hostname
-	// +required
-	Type GRPCEndpointExposureType `json:"type,omitempty"`
+type EndpointExposure struct {
+	// usage defines the usage of the endpoint. It could be "agentToHub" indicating the endpoint is used
+	// for communication between agent and hub, or "consumer" indicating the endpoint is used for external consumer.
+	// +optional
+	Usage string `json:"usage,omitempty"`
 
-	// Hostname points to a fixed hostname for serving agents' handshakes.
+	// protocol is the protocol used for the endpoint, could be https or grpc.
+	// +kubebuilder:default:=grpc
+	// +kubebuilder:validation:Enum=grpc;https
+	// +required
+	Protocol string `json:"protocol"`
+
+	// grpc represents the configuration for grpc endpoint.
+	GRPC *Endpoint `json:"grpc,omitempty"`
+
+	// https represents the configuration for https endpoint.
+	HTTPS *Endpoint `json:"https,omitempty"`
+}
+
+type Endpoint struct {
+	// type specifies how the endpoint is exposed.
+	// You may need to apply an object to expose the endpoint, for example: a route.
+	// +kubebuilder:default:=hostname
+	// +kubebuilder:validation:Enum=hostname;loadBalancer;route
+	// +required
+	Type EndpointExposureType `json:"type,omitempty"`
+
+	// hostname points to a fixed hostname for serving agents' handshakes.
 	// +optional
 	Hostname *HostnameConfig `json:"hostname,omitempty"`
+
+	// LoadBalancer points customized configuration for loadBalancer type.
+	// +optional
+	LoadBalancer *LoadBalancerConfig `json:"loadBalancer,omitempty"`
+
+	// Route points customized configuration for route type.
+	// +optional
+	Route *RouteConfig `json:"route,omitempty"`
 }
 
 // HostnameConfig references a fixed hostname.
 type HostnameConfig struct {
+	// host is the host name of the endpoint.
 	// +required
-	Value string `json:"value"`
+	Host string `json:"host"`
+
+	// caBundle of the endpoint.
+	// +optional
+	CABundle []byte `json:"caBundle,omitempty"`
 }
 
-// GRPCEndpointExposureType represents the type of endpoint exposure for gRPC.
-type GRPCEndpointExposureType string
+// LoadBalancerConfig references customized configuration for LoadBalancer type.
+type LoadBalancerConfig struct {
+	// Host is the customized host name of the endpoint.
+	// +optional
+	Host string `json:"host,omitempty"`
+
+	// CABundle is a customized caBundle of the endpoint.
+	// +optional
+	CABundle []byte `json:"caBundle,omitempty"`
+}
+
+// RouteConfig references customized configuration for Route type.
+type RouteConfig struct {
+	// Host is the customized host name of the endpoint.
+	// +optional
+	Host string `json:"host,omitempty"`
+
+	// CABundle is a customized caBundle of the endpoint.
+	// +optional
+	CABundle []byte `json:"caBundle,omitempty"`
+}
+
+// EndpointExposureType represents the type of endpoint exposure.
+type EndpointExposureType string
 
 const (
-	// GRPCEndpointTypeHostname is the gRPC endpoint exposure type for hostname.
-	GRPCEndpointTypeHostname GRPCEndpointExposureType = "hostname"
+	// EndpointTypeHostname is the endpoint exposure type for hostname.
+	EndpointTypeHostname EndpointExposureType = "hostname"
+
+	// EndpointTypeLoadBalancer is the endpoint exposure type for load balancer.
+	EndpointTypeLoadBalancer EndpointExposureType = "loadBalancer"
+
+	// EndpointTypeRoute is the endpoint exposure type for route.
+	EndpointTypeRoute EndpointExposureType = "route"
 )
 
 type CSRConfig struct {
@@ -223,6 +294,13 @@ type AwsIrsaConfig struct {
 	// Example - "product:v1:tenant:app-name=My-App"
 	// +optional
 	Tags []string `json:"tags,omitempty"`
+}
+
+// GRPC represents the configuration for gRPC registration driver.
+type GRPCRegistrationConfig struct {
+	// AutoApprovedIdentities represent a list of approved users
+	// +optional
+	AutoApprovedIdentities []string `json:"autoApprovedIdentities,omitempty"`
 }
 
 type WorkConfiguration struct {
@@ -432,6 +510,8 @@ type ClusterManagerStatus struct {
 	// Progressing: Components in hub are in a transitioning state.
 	// Degraded: Components in hub do not match the desired configuration and only provide
 	// degraded service.
+	// +listType=map
+	// +listMapKey=type
 	Conditions []metav1.Condition `json:"conditions"`
 
 	// Generations are used to determine when an item needs to be reconciled or has changed in a way that needs a reaction.
