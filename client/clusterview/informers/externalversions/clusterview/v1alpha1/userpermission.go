@@ -40,7 +40,7 @@ func NewUserPermissionInformer(client versioned.Interface, resyncPeriod time.Dur
 // one. This reduces memory footprint and number of connections to the server.
 func NewFilteredUserPermissionInformer(client versioned.Interface, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
-		&cache.ListWatch{
+		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
@@ -65,7 +65,7 @@ func NewFilteredUserPermissionInformer(client versioned.Interface, resyncPeriod 
 				}
 				return client.ClusterviewV1alpha1().UserPermissions().Watch(ctx, options)
 			},
-		},
+		}, client),
 		&clusterlifecycleapiclusterviewv1alpha1.UserPermission{},
 		resyncPeriod,
 		indexers,

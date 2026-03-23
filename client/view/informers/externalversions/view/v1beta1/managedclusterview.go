@@ -41,7 +41,7 @@ func NewManagedClusterViewInformer(client versioned.Interface, namespace string,
 // one. This reduces memory footprint and number of connections to the server.
 func NewFilteredManagedClusterViewInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
-		&cache.ListWatch{
+		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
@@ -66,7 +66,7 @@ func NewFilteredManagedClusterViewInformer(client versioned.Interface, namespace
 				}
 				return client.ViewV1beta1().ManagedClusterViews(namespace).Watch(ctx, options)
 			},
-		},
+		}, client),
 		&clusterlifecycleapiviewv1beta1.ManagedClusterView{},
 		resyncPeriod,
 		indexers,

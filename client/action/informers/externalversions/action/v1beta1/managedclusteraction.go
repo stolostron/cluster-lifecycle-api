@@ -41,7 +41,7 @@ func NewManagedClusterActionInformer(client versioned.Interface, namespace strin
 // one. This reduces memory footprint and number of connections to the server.
 func NewFilteredManagedClusterActionInformer(client versioned.Interface, namespace string, resyncPeriod time.Duration, indexers cache.Indexers, tweakListOptions internalinterfaces.TweakListOptionsFunc) cache.SharedIndexInformer {
 	return cache.NewSharedIndexInformer(
-		&cache.ListWatch{
+		cache.ToListWatcherWithWatchListSemantics(&cache.ListWatch{
 			ListFunc: func(options v1.ListOptions) (runtime.Object, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
@@ -66,7 +66,7 @@ func NewFilteredManagedClusterActionInformer(client versioned.Interface, namespa
 				}
 				return client.ActionV1beta1().ManagedClusterActions(namespace).Watch(ctx, options)
 			},
-		},
+		}, client),
 		&clusterlifecycleapiactionv1beta1.ManagedClusterAction{},
 		resyncPeriod,
 		indexers,
