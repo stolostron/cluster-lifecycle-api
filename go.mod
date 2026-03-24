@@ -4,7 +4,9 @@ go 1.25.0
 
 require (
 	github.com/gogo/protobuf v1.3.2
+	github.com/openshift/api v0.0.0-20251120220512-cb382c9eaf42
 	github.com/openshift/build-machinery-go v0.0.0-20250602125535-1b6d00b8c37c
+	github.com/openshift/client-go v0.0.0-20251015124057-db0dee36e235
 	github.com/spf13/pflag v1.0.9
 	k8s.io/api v0.35.3
 	k8s.io/apimachinery v0.35.3
