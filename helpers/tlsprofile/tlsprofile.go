@@ -16,19 +16,23 @@ import (
 )
 
 // GetTLSConfig reads the TLS profile from the cluster's APIServer CR and returns a tls.Config.
-// If not running on OpenShift or if the profile is not configured, it returns a secure default (TLS 1.2).
+// If not running on OpenShift (NotFound error), it returns a secure default (TLS 1.2).
+// For other errors, it returns the error to allow the caller to decide how to handle it.
 func GetTLSConfig(kubeConfig *rest.Config) (*tls.Config, error) {
 	profile, err := GetTLSSecurityProfile(kubeConfig)
 	if err != nil {
-		klog.V(4).Infof("Failed to get TLS security profile from cluster, using default TLS 1.2: %v", err)
-		return &tls.Config{MinVersion: tls.VersionTLS12}, nil
+		if errors.IsNotFound(err) {
+			klog.Info("Not running on OpenShift cluster, using default TLS 1.2 configuration")
+			return &tls.Config{MinVersion: tls.VersionTLS12}, nil
+		}
+		return nil, fmt.Errorf("failed to get TLS security profile: %w", err)
 	}
 
 	return ConvertTLSProfileToConfig(profile), nil
 }
 
 // GetTLSSecurityProfile reads the TLS security profile from the APIServer CR.
-// Returns nil error with nil profile if not running on OpenShift.
+// Returns NotFound error if not running on OpenShift cluster.
 func GetTLSSecurityProfile(kubeConfig *rest.Config) (*configv1.TLSSecurityProfile, error) {
 	// Create an OpenShift config client
 	configClient, err := configclient.NewForConfig(kubeConfig)
@@ -48,7 +52,7 @@ func GetTLSSecurityProfile(kubeConfig *rest.Config) (*configv1.TLSSecurityProfil
 
 	// Return the TLS security profile
 	if apiServer.Spec.TLSSecurityProfile == nil {
-		klog.V(4).Info("No TLS security profile defined in APIServer CR, using Intermediate profile")
+		klog.Info("No TLS security profile defined in APIServer CR, using Intermediate profile")
 		// Default to Intermediate profile
 		intermediate := configv1.TLSProfileIntermediateType
 		return &configv1.TLSSecurityProfile{

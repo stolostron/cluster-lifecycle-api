@@ -251,21 +251,16 @@ func TestGetCipherSuiteMap(t *testing.T) {
 }
 
 func TestGetTLSConfig_InvalidConfig(t *testing.T) {
-	// Test with invalid config that will fail to connect
+	// Test with invalid config that will fail to create client
 	invalidConfig := &rest.Config{
 		Host:    "https://invalid-host.local:6443",
 		Timeout: 1, // Very short timeout
 	}
 
-	// Should return default config even on error
-	tlsConfig, err := GetTLSConfig(invalidConfig)
-	if err != nil {
-		t.Errorf("Expected nil error, got: %v", err)
-	}
-
-	// Should fall back to TLS 1.2
-	if tlsConfig.MinVersion != tls.VersionTLS12 {
-		t.Errorf("Expected default MinVersion TLS 1.2, got: %v", tlsConfig.MinVersion)
+	// Should return error for connection failures
+	_, err := GetTLSConfig(invalidConfig)
+	if err == nil {
+		t.Error("Expected error for invalid config, got nil")
 	}
 }
 

@@ -4,6 +4,7 @@ package tlsprofile
 
 import (
 	"context"
+	"fmt"
 	"reflect"
 	"time"
 
@@ -19,16 +20,17 @@ import (
 // StartTLSProfileWatcher watches the APIServer CR for TLS profile changes and triggers a graceful restart.
 // The cancel function will be called when a TLS profile change is detected, triggering graceful shutdown.
 // This allows Kubernetes to restart the pod with the new TLS settings.
+// Returns nil without starting the watcher if not running on OpenShift (NotFound error).
+// Returns error for other failures, allowing the caller to decide whether to fail or continue.
 func StartTLSProfileWatcher(ctx context.Context, kubeConfig *rest.Config, cancel context.CancelFunc) error {
 	// Get initial TLS profile to compare against
 	initialProfile, err := GetTLSSecurityProfile(kubeConfig)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			klog.V(4).Info("APIServer CR not found, not running on OpenShift - TLS profile watcher disabled")
+			klog.Info("Not running on OpenShift cluster - TLS profile watcher disabled")
 			return nil
 		}
-		klog.V(4).Infof("Failed to get initial TLS profile, watcher will not start: %v", err)
-		return nil // Don't fail the application if watcher can't start
+		return fmt.Errorf("failed to get initial TLS profile: %w", err)
 	}
 
 	klog.Infof("Starting TLS profile watcher with initial profile: type=%s", initialProfile.Type)
@@ -36,8 +38,7 @@ func StartTLSProfileWatcher(ctx context.Context, kubeConfig *rest.Config, cancel
 	// Create OpenShift config client
 	client, err := configclient.NewForConfig(kubeConfig)
 	if err != nil {
-		klog.V(4).Infof("Failed to create config client for watcher: %v", err)
-		return nil
+		return fmt.Errorf("failed to create config client for watcher: %w", err)
 	}
 
 	// Create ListWatch for APIServer resource, filtered to only "cluster"
@@ -48,17 +49,17 @@ func StartTLSProfileWatcher(ctx context.Context, kubeConfig *rest.Config, cancel
 		fields.OneTermEqualSelector("metadata.name", "cluster"),
 	)
 
-	// Create informer from ListWatch
-	_, controller := cache.NewInformer(
-		listWatch,
-		&configv1.APIServer{},
-		10*time.Minute,
-		cache.ResourceEventHandlerFuncs{
+	// Create informer from ListWatch using the non-deprecated API
+	_, controller := cache.NewInformerWithOptions(cache.InformerOptions{
+		ListerWatcher: listWatch,
+		ObjectType:    &configv1.APIServer{},
+		ResyncPeriod:  10 * time.Minute,
+		Handler: cache.ResourceEventHandlerFuncs{
 			UpdateFunc: func(oldObj, newObj interface{}) {
 				handleAPIServerUpdate(oldObj, newObj, cancel)
 			},
 		},
-	)
+	})
 
 	// Start the controller
 	go controller.Run(ctx.Done())
