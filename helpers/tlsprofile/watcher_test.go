@@ -195,7 +195,7 @@ func TestGetTLSProfileType(t *testing.T) {
 }
 
 func TestStartTLSProfileWatcher_InvalidHost(t *testing.T) {
-	// Test with unreachable host - watcher should handle gracefully and return nil
+	// Test with unreachable host - watcher should return error
 	ctx := context.Background()
 	cancel := func() {}
 
@@ -205,10 +205,10 @@ func TestStartTLSProfileWatcher_InvalidHost(t *testing.T) {
 		Timeout: 1, // 1 nanosecond to fail fast
 	}
 
-	// This will fail to get initial profile, but should return nil (not fail the app)
+	// This will fail to get initial profile and should return an error
 	err := StartTLSProfileWatcher(ctx, invalidConfig, cancel)
-	if err != nil {
-		t.Errorf("Expected nil error for graceful handling, got: %v", err)
+	if err == nil {
+		t.Error("Expected error for invalid host, got nil")
 	}
 }
 
@@ -222,10 +222,10 @@ func TestStartTLSProfileWatcher_CancelledContext(t *testing.T) {
 		Timeout: 1,
 	}
 
-	// Should still return nil even with cancelled context
+	// Should return error for invalid config
 	err := StartTLSProfileWatcher(ctx, invalidConfig, cancel)
-	if err != nil {
-		t.Errorf("Expected nil error, got: %v", err)
+	if err == nil {
+		t.Error("Expected error for invalid config, got nil")
 	}
 }
 
