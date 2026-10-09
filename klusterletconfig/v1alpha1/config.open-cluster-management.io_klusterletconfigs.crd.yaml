@@ -476,13 +476,6 @@ spec:
                   - mirror
                   type: object
                 type: array
-              workStatusSyncInterval:
-                description: |-
-                  WorkStatusSyncInterval is the interval for the work agent to check the status of ManifestWorks.
-                  Larger value means less frequent status sync and less api calls to the managed cluster, vice versa.
-                  The value(x) should be: 5s <= x <= 1h.
-                pattern: ^([0-9]+(s|m|h))+$
-                type: string
               resourceRequirements:
                 description: |-
                   ResourceRequirements specify QoS classes of deployments managed by the klusterlet.
@@ -493,11 +486,43 @@ spec:
                     description: ResourceRequirements defines resource requests and
                       limits when Type is ResourceQosClassResourceRequirement
                     properties:
+                      claims:
+                        description: |-
+                          Claims lists the names of resources, defined in spec.resourceClaims,
+                          that are used by this container.
+
+                          This field depends on the
+                          DynamicResourceAllocation feature gate.
+
+                          This field is immutable. It can only be set for containers.
+                        items:
+                          description: ResourceClaim references one entry in PodSpec.ResourceClaims.
+                          properties:
+                            name:
+                              description: |-
+                                Name must match the name of one entry in pod.spec.resourceClaims of
+                                the Pod where this field is used. It makes that resource available
+                                inside a container.
+                              type: string
+                            request:
+                              description: |-
+                                Request is the name chosen for a request in the referenced claim.
+                                If empty, everything from the claim is made available, otherwise
+                                only the result of this request.
+                              type: string
+                          required:
+                          - name
+                          type: object
+                        type: array
+                        x-kubernetes-list-map-keys:
+                        - name
+                        x-kubernetes-list-type: map
                       limits:
                         additionalProperties:
                           anyOf:
                           - type: integer
                           - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                           x-kubernetes-int-or-string: true
                         description: |-
                           Limits describes the maximum amount of compute resources allowed.
@@ -508,6 +533,7 @@ spec:
                           anyOf:
                           - type: integer
                           - type: string
+                          pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
                           x-kubernetes-int-or-string: true
                         description: |-
                           Requests describes the minimum amount of compute resources required.
@@ -518,15 +544,19 @@ spec:
                     type: object
                   type:
                     default: Default
-                    description: Type is the QoS class for klusterlet agent deployments.
                     enum:
                     - Default
                     - BestEffort
                     - ResourceRequirement
                     type: string
-                required:
-                - type
                 type: object
+              workStatusSyncInterval:
+                description: |-
+                  WorkStatusSyncInterval is the interval for the work agent to check the status of ManifestWorks.
+                  Larger value means less frequent status sync and less api calls to the managed cluster, vice versa.
+                  The value(x) should be: 5s <= x <= 1h.
+                pattern: ^([0-9]+(s|m|h))+$
+                type: string
             type: object
           status:
             description: Status defines the observed state of KlusterletConfig
